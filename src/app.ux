@@ -1,0 +1,43 @@
+<!-- src/app.ux -->
+<template>
+  <!-- 快应用要求 app.ux 必须包含一个根元素 -->
+  <div></div>
+</template>
+
+<script>
+// 全局应用逻辑
+export default {
+  onCreate() {
+    console.log('DevToys Quick 启动');
+  },
+
+  onDestroy() {
+    console.log('应用退出');
+  },
+
+  // 全局复制方法（可在任意页面通过 this.$app.$def.copyText 调用）
+  copyText(text) {
+    if (!text) return;
+    try {
+      const clipboard = require('@system.clipboard');
+      clipboard.set({
+        text: text,
+        success: () => {
+          // 可选：触发全局 toast（需在页面中调用 prompt）
+          console.log('已复制到剪贴板');
+        },
+        fail: (err) => {
+          console.error('复制失败:', err);
+        }
+      });
+    } catch (e) {
+      console.error('剪贴板 API 不可用:', e);
+    }
+  }
+};
+</script>
+
+<style>
+/* 全局样式（可选） */
+/* 注意：快应用中全局样式作用有限，建议在各页面或组件中定义 */
+</style>

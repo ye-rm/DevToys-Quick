@@ -1,0 +1,219 @@
+<template>
+  <div class="page">
+    <!-- Header with Back Button -->
+    <div class="header">
+      <div class="icon-btn" onclick="goBack">
+        <text class="back-icon">‹</text>
+      </div>
+      <text class="title">Base64 Converter</text>
+      <!-- Invisible spacer to balance the header so title stays centered -->
+      <div class="icon-btn placeholder"></div>
+    </div>
+
+    <!-- Mode Switcher (Tabs) -->
+    <div class="tabs">
+      <div class="tab-item {{mode === 'encode' ? 'active' : ''}}" onclick="setMode('encode')">
+        <text class="tab-text {{mode === 'encode' ? 'active-text' : ''}}">Encode</text>
+      </div>
+      <div class="tab-item {{mode === 'decode' ? 'active' : ''}}" onclick="setMode('decode')">
+        <text class="tab-text {{mode === 'decode' ? 'active-text' : ''}}">Decode</text>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <text class="label">Input {{mode === 'encode' ? '(Text)' : '(Base64)'}}</text>
+    <textarea 
+      class="input-area" 
+      placeholder="{{mode === 'encode' ? 'Type text to encode...' : 'Paste Base64 to decode...'}}" 
+      onchange="handleInput" 
+      value="{{inputText}}">
+    </textarea>
+
+    <!-- Output Area -->
+    <text class="label">Output</text>
+    <textarea class="output-area" readonly="true">{{outputText}}</textarea>
+
+    <!-- Copy Button -->
+    <div class="footer">
+      <input type="button" class="btn" value="Copy Result" onclick="copyToClipboard" />
+    </div>
+  </div>
+</template>
+
+<script>
+import clipboard from '@system.clipboard'
+import prompt from '@system.prompt'
+import router from '@system.router' // 1. Imported Router
+
+export default {
+  data: {
+    mode: 'encode',
+    inputText: '',
+    outputText: ''
+  },
+
+  /**
+   * 2. Added Navigation Logic
+   */
+  goBack() {
+    router.back();
+  },
+
+  setMode(newMode) {
+    if (this.mode === newMode) return;
+    this.mode = newMode;
+    this.inputText = '';
+    this.outputText = '';
+  },
+
+  handleInput(evt) {
+    this.inputText = evt.value;
+    this.convert();
+  },
+
+  convert() {
+    if (!this.inputText) {
+      this.outputText = '';
+      return;
+    }
+    try {
+      if (this.mode === 'encode') {
+        this.outputText = btoa(encodeURIComponent(this.inputText).replace(/%([0-9A-F]{2})/g,
+          function toSolidBytes(match, p1) {
+            return String.fromCharCode('0x' + p1);
+        }));
+      } else {
+        this.outputText = decodeURIComponent(atob(this.inputText).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+      }
+    } catch (e) {
+      this.outputText = "Error: Invalid input";
+    }
+  },
+
+  copyToClipboard() {
+    if (!this.outputText) {
+      prompt.showToast({ message: 'Nothing to copy' });
+      return;
+    }
+    clipboard.set({
+      text: this.outputText,
+      success: () => {
+        prompt.showToast({ message: 'Copied!' })
+      }
+    })
+  }
+}
+</script>
+
+<style>
+  .page {
+    flex-direction: column;
+    padding: 0 30px 30px 30px; /* Adjusted padding */
+    background-color: #f8f9fa;
+  }
+
+  /* 3. Updated Header Styles for Layout */
+  .header {
+    height: 120px;
+    flex-direction: row; /* Align items horizontally */
+    align-items: center;
+    justify-content: space-between; /* Space between Back, Title, Placeholder */
+    margin-bottom: 20px;
+  }
+
+  .title {
+    font-size: 38px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+  }
+
+  /* Back Button Styles */
+  .icon-btn {
+    width: 80px;
+    height: 80px;
+    justify-content: flex-start; /* Align icon to left */
+    align-items: center;
+  }
+
+  .back-icon {
+    font-size: 80px; /* Large arrow size */
+    color: #007aff;
+    margin-top: -10px; /* Slight visual correction for the font vertical align */
+  }
+
+  /* Placeholder just keeps the title centered */
+  .placeholder {
+    opacity: 0;
+  }
+
+  /* Rest of the styles remain the same */
+  .tabs {
+    flex-direction: row;
+    background-color: #e0e0e0;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    padding: 5px;
+  }
+
+  .tab-item {
+    flex: 1;
+    height: 80px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+  }
+
+  .active {
+    background-color: #ffffff;
+  }
+
+  .tab-text {
+    font-size: 30px;
+    color: #666;
+  }
+
+  .active-text {
+    color: #007aff;
+    font-weight: bold;
+  }
+
+  .label {
+    font-size: 28px;
+    color: #555;
+    margin-bottom: 15px;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+
+  .input-area, .output-area {
+    height: 250px;
+    padding: 20px;
+    font-size: 30px;
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    color: #333;
+  }
+
+  .output-area {
+    background-color: #e9ecef;
+    color: #444;
+  }
+
+  .footer {
+    margin-top: 20px;
+  }
+
+  .btn {
+    height: 90px;
+    width: 100%;
+    background-color: #007aff;
+    color: #ffffff;
+    font-size: 32px;
+    border-radius: 15px;
+  }
+</style>

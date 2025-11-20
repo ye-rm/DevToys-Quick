@@ -1,0 +1,53 @@
+{
+  "package": "com.devtoys.quick",
+  "name": "DevToys Quick",
+  "versionName": "1.0.0",
+  "versionCode": 1,
+  "minPlatformVersion": 1090,
+  "icon": "/assets/images/logo.png",
+  "description": "开发者常用工具集合：JSON 格式化、Base64 编解码、正则测试、密码生成等，支持语音输入。",
+  "features": [
+    { "name": "system.media" },
+    { "name": "system.clipboard" },
+    { "name": "system.prompt" }
+  ],
+  "permissions": [
+    {
+      "name": "ohos.permission.MICROPHONE"
+    }
+  ],
+  "config": {
+    "logLevel": "debug"
+  },
+  "router": {
+    "entry": "pages/home/index",
+    "pages": {
+      "pages/home/index": {
+        "component": "index"
+      },
+      "pages/base64": {
+        "component": "index"
+      },
+      "pages/json-formatter": {
+        "component": "index"
+      },
+      "pages/regex-tester": {
+        "component": "index"
+      },
+      "pages/password-gen": {
+        "component": "index"
+      },
+      "pages/markdown-preview": {
+        "component": "index"
+      },
+      "pages/number-base": {
+        "component": "index"
+      }
+    }
+  },
+  "display": {
+    "titleBar": true,
+    "titleBarText": "DevToys Quick",
+    "menu": false
+  }
+}

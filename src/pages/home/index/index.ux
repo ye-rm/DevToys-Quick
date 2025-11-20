@@ -1,0 +1,121 @@
+<template>
+  <div class="page-container">
+    <!-- Header Area -->
+    <div class="header">
+      <text class="app-title">DevToys</text>
+      <text class="app-subtitle">Developers' Swiss Army Knife</text>
+    </div>
+
+    <!-- Tools Grid -->
+    <div class="grid-container">
+      <!-- Iterate through the tools from constants.js -->
+      <div class="card" for="{{toolsList}}" onclick="navigateTo($item.route)">
+        <div class="icon-wrapper">
+          <image class="icon" src="{{$item.icon}}"></image>
+        </div>
+        <text class="card-text">{{$item.name}}</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+// Import the default export from your constants file
+// Relative path assumes: src/pages/home/index/index.ux -> ../../common/constants.js
+import constants from '../../../common/constants'
+
+export default {
+  // Define the data model
+  data: {
+    toolsList: []
+  },
+
+  // Lifecycle hook: runs when page is initialized
+  onInit() {
+    // Assign the imported TOOLS array to our local data
+    this.toolsList = constants.TOOLS;
+  },
+
+  // Navigation handler
+  navigateTo(routeUri) {
+    if (routeUri) {
+      router.push({
+        uri: routeUri
+      })
+    }
+  }
+}
+</script>
+
+<style>
+  /* Main Page Layout */
+  .page-container {
+    flex-direction: column;
+    background-color: #f8f9fa;
+    padding: 0 20px;
+  }
+
+  /* Header Styles */
+  .header {
+    flex-direction: column;
+    margin-top: 50px;
+    margin-bottom: 40px;
+    align-items: center;
+  }
+
+  .app-title {
+    font-size: 50px;
+    font-weight: bold;
+    color: #333333;
+  }
+
+  .app-subtitle {
+    font-size: 28px;
+    color: #888888;
+    margin-top: 10px;
+  }
+
+  /* Grid Layout */
+  .grid-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  /* Individual Card Styles */
+  .card {
+    width: 340px; /* Adjust width to fit 2 columns on typical screens */
+    height: 300px;
+    background-color: #ffffff;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card:active {
+    background-color: #eef1f5; /* Visual feedback on press */
+  }
+
+  .icon-wrapper {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 25px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .card-text {
+    font-size: 32px;
+    color: #444444;
+    font-weight: 500;
+  }
+</style>
