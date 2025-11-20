@@ -1,0 +1,374 @@
+<template>
+  <div class="page">
+    <!-- Header -->
+    <div class="header">
+      <div class="icon-btn" onclick="goBack">
+        <text class="back-icon">‹</text>
+      </div>
+      <text class="title">Hash Generator</text>
+      <div class="icon-btn placeholder"></div>
+    </div>
+
+    <!-- Configuration Section -->
+    <div class="section-title">
+      <text>Configuration</text>
+    </div>
+    <div class="card config-card">
+      
+      <!-- 1. Output Type Selector -->
+      <div class="config-row border-bottom">
+        <text class="config-main-text">Output Type</text>
+        <div class="type-selector">
+          <text 
+            class="{{outputType === 'hex' ? 'type-btn active' : 'type-btn'}}" 
+            onclick="setOutputType('hex')">Hex</text>
+          <text 
+            class="{{outputType === 'base64' ? 'type-btn active' : 'type-btn'}}" 
+            onclick="setOutputType('base64')">Base64</text>
+        </div>
+      </div>
+
+      <!-- 2. Uppercase Toggle (Disabled if Base64) -->
+      <div class="config-row">
+        <div class="config-label">
+          <text class="{{outputType === 'base64' ? 'config-main-text disabled-text' : 'config-main-text'}}">Uppercase</text>
+        </div>
+        <!-- Note: 'disabled' attribute works on native switch in some versions, 
+             but we also control logic to ignore it if base64 -->
+        <switch 
+          checked="{{isUppercase}}" 
+          onchange="toggleUppercase" 
+          disabled="{{outputType === 'base64'}}">
+        </switch>
+      </div>
+
+    </div>
+
+    <!-- Input Section -->
+    <div class="section-header-row">
+      <text class="section-title">Input</text>
+      <div class="input-actions">
+        <div class="mini-btn" onclick="pasteFromClipboard">
+          <text class="mini-btn-text">Paste</text>
+        </div>
+        <div class="mini-btn" onclick="clearInput">
+          <text class="mini-btn-text">Clear</text>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card input-card">
+      <textarea 
+        class="input-area" 
+        placeholder="Type text here to hash..." 
+        value="{{inputText}}"
+        onchange="handleInput">
+      </textarea>
+    </div>
+
+    <!-- Outputs Section -->
+    <div class="output-group">
+      
+      <text class="label">MD5</text>
+      <div class="output-row">
+        <text class="hash-text">{{hashes.md5}}</text>
+        <div class="copy-btn" onclick="copyHash(hashes.md5)">
+          <text class="copy-icon">📋</text>
+        </div>
+      </div>
+
+      <text class="label">SHA1</text>
+      <div class="output-row">
+        <text class="hash-text">{{hashes.sha1}}</text>
+        <div class="copy-btn" onclick="copyHash(hashes.sha1)">
+          <text class="copy-icon">📋</text>
+        </div>
+      </div>
+
+      <text class="label">SHA256</text>
+      <div class="output-row">
+        <text class="hash-text">{{hashes.sha256}}</text>
+        <div class="copy-btn" onclick="copyHash(hashes.sha256)">
+          <text class="copy-icon">📋</text>
+        </div>
+      </div>
+
+      <text class="label">SHA512</text>
+      <div class="output-row">
+        <text class="hash-text">{{hashes.sha512}}</text>
+        <div class="copy-btn" onclick="copyHash(hashes.sha512)">
+          <text class="copy-icon">📋</text>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+import clipboard from '@system.clipboard'
+import prompt from '@system.prompt'
+import CryptoJS from 'crypto-js'
+
+export default {
+  data: {
+    inputText: '',
+    isUppercase: false,
+    outputType: 'hex', // 'hex' or 'base64'
+    hashes: {
+      md5: '',
+      sha1: '',
+      sha256: '',
+      sha512: ''
+    }
+  },
+
+  onInit() {
+    // Start empty
+  },
+
+  goBack() {
+    router.back()
+  },
+
+  handleInput(evt) {
+    this.inputText = evt.value;
+    this.calculateHashes();
+  },
+
+  toggleUppercase(evt) {
+    // If Base64, force switch logic to fail or revert (though UI disabled is best)
+    if (this.outputType === 'base64') return;
+    
+    this.isUppercase = evt.checked;
+    this.calculateHashes();
+  },
+
+  setOutputType(type) {
+    if (this.outputType === type) return;
+    this.outputType = type;
+    this.calculateHashes();
+  },
+
+  pasteFromClipboard() {
+    clipboard.get({
+      success: (data) => {
+        if (data.text) {
+          this.inputText = data.text;
+          this.calculateHashes();
+          prompt.showToast({ message: 'Pasted' });
+        }
+      }
+    });
+  },
+
+  clearInput() {
+    this.inputText = '';
+    this.calculateHashes();
+  },
+
+  calculateHashes() {
+    if (!this.inputText) {
+      this.hashes = { md5: '', sha1: '', sha256: '', sha512: '' };
+      return;
+    }
+
+    const text = this.inputText;
+    
+    // 1. Generate raw WordArrays
+    const rawMd5 = CryptoJS.MD5(text);
+    const rawSha1 = CryptoJS.SHA1(text);
+    const rawSha256 = CryptoJS.SHA256(text);
+    const rawSha512 = CryptoJS.SHA512(text);
+
+    // 2. formatting function
+    const format = (wordArray) => {
+      if (this.outputType === 'base64') {
+        // Base64 is always case sensitive, ignore 'isUppercase'
+        return wordArray.toString(CryptoJS.enc.Base64);
+      } else {
+        // Hex
+        let str = wordArray.toString(CryptoJS.enc.Hex);
+        if (this.isUppercase) {
+          return str.toUpperCase();
+        }
+        return str;
+      }
+    };
+
+    this.hashes = {
+      md5: format(rawMd5),
+      sha1: format(rawSha1),
+      sha256: format(rawSha256),
+      sha512: format(rawSha512)
+    };
+  },
+
+  copyHash(textVal) {
+    if (!textVal) return;
+    clipboard.set({
+      text: textVal,
+      success: () => {
+        prompt.showToast({ message: 'Copied!' });
+      }
+    });
+  }
+}
+</script>
+
+<style>
+  /* Layout Basics */
+  .page {
+    flex-direction: column;
+    background-color: #f9f9f9;
+    padding: 0 30px 50px 30px;
+  }
+
+  /* Header */
+  .header {
+    height: 120px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title {
+    font-size: 38px;
+    font-weight: bold;
+    color: #333;
+  }
+  .icon-btn {
+    width: 80px;
+    height: 80px;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .back-icon {
+    font-size: 80px;
+    color: #007aff;
+    margin-top: -10px;
+  }
+  .placeholder { opacity: 0; }
+
+  /* Card Style */
+  .card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e5e5;
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+
+  /* Configuration Styles */
+  .section-title {
+    font-size: 30px;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  .config-card {
+    padding: 0 30px;
+    flex-direction: column;
+  }
+  .config-row {
+    height: 110px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .border-bottom {
+    border-bottom-width: 1px;
+    border-bottom-color: #f0f0f0;
+  }
+  .config-main-text {
+    font-size: 32px;
+    color: #333;
+  }
+  .disabled-text {
+    color: #cccccc; /* Visual cue for disabled state */
+  }
+
+  /* Type Selector (Hex vs Base64) */
+  .type-selector {
+    flex-direction: row;
+    background-color: #eeeeee;
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .type-btn {
+    padding: 10px 25px;
+    font-size: 26px;
+    color: #666;
+    border-radius: 8px;
+  }
+  .active {
+    background-color: #ffffff;
+    color: #007aff;
+    font-weight: bold;
+    box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
+  }
+
+  /* Input Section */
+  .section-header-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 15px;
+  }
+  .input-actions {
+    flex-direction: row;
+  }
+  .mini-btn {
+    margin-left: 20px;
+    padding: 5px 15px;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  .mini-btn-text {
+    font-size: 24px;
+    color: #555;
+  }
+  .input-card { padding: 0; }
+  .input-area {
+    width: 100%;
+    height: 200px;
+    padding: 20px;
+    font-size: 30px;
+    color: #333;
+  }
+
+  /* Output Section */
+  .output-group { flex-direction: column; }
+  .label {
+    font-size: 26px;
+    color: #666;
+    margin-bottom: 10px;
+    margin-top: 10px;
+  }
+  .output-row {
+    flex-direction: row;
+    background-color: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 10px 20px;
+    align-items: center;
+    height: 100px;
+    margin-bottom: 15px;
+  }
+  .hash-text {
+    flex: 1;
+    font-size: 28px;
+    color: #444;
+    lines: 1;
+    text-overflow: ellipsis;
+  }
+  .copy-btn {
+    width: 80px;
+    height: 80px;
+    justify-content: flex-end;
+    align-items: center;
+    margin-left: 10px;
+  }
+  .copy-icon { font-size: 40px; }
+</style>

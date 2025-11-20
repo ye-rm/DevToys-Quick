@@ -1,0 +1,423 @@
+<template>
+  <div class="page">
+    <!-- Header -->
+    <div class="header">
+      <div class="icon-btn" onclick="goBack">
+        <text class="back-icon">‹</text>
+      </div>
+      <text class="title">Number Base</text>
+      <div class="icon-btn placeholder"></div>
+    </div>
+
+    <!-- Configuration -->
+    <div class="section-title">
+      <text>Configuration</text>
+    </div>
+    <div class="card config-card">
+      <div class="config-row">
+        <text class="config-label">Format number</text>
+        <switch checked="{{isFormatted}}" onchange="toggleFormat"></switch>
+      </div>
+    </div>
+
+    <!-- Inputs List -->
+    
+    <!-- 1. Hexadecimal -->
+    <div class="input-group">
+      <div class="label-row">
+        <text class="label">Hexadecimal</text>
+        <div class="mini-btn" onclick="pasteTo('hex')">
+          <text class="mini-btn-text">Paste</text>
+        </div>
+      </div>
+      <input 
+        type="text" 
+        class="input-field {{errors.hex ? 'input-error' : ''}}" 
+        value="{{hex}}" 
+        onchange="onHexChange" 
+        placeholder="0"
+      />
+      <!-- Error Hint -->
+      <text class="error-hint" if="{{errors.hex}}">{{errors.hex}}</text>
+    </div>
+
+    <!-- 2. Decimal -->
+    <div class="input-group">
+      <div class="label-row">
+        <text class="label">Decimal</text>
+        <div class="mini-btn" onclick="pasteTo('dec')">
+          <text class="mini-btn-text">Paste</text>
+        </div>
+      </div>
+      <input 
+        type="number" 
+        class="input-field {{errors.dec ? 'input-error' : ''}}" 
+        value="{{dec}}" 
+        onchange="onDecChange" 
+        placeholder="0"
+      />
+      <text class="error-hint" if="{{errors.dec}}">{{errors.dec}}</text>
+    </div>
+
+    <!-- 3. Octal -->
+    <div class="input-group">
+      <div class="label-row">
+        <text class="label">Octal</text>
+        <div class="mini-btn" onclick="pasteTo('oct')">
+          <text class="mini-btn-text">Paste</text>
+        </div>
+      </div>
+      <input 
+        type="number" 
+        class="input-field {{errors.oct ? 'input-error' : ''}}" 
+        value="{{oct}}" 
+        onchange="onOctChange" 
+        placeholder="0"
+      />
+      <text class="error-hint" if="{{errors.oct}}">{{errors.oct}}</text>
+    </div>
+
+    <!-- 4. Binary -->
+    <div class="input-group">
+      <div class="label-row">
+        <text class="label">Binary</text>
+        <div class="mini-btn" onclick="pasteTo('bin')">
+          <text class="mini-btn-text">Paste</text>
+        </div>
+      </div>
+      <textarea 
+        class="input-field multiline {{errors.bin ? 'input-error' : ''}}" 
+        value="{{bin}}" 
+        onchange="onBinChange" 
+        placeholder="0"
+      ></textarea>
+      <text class="error-hint" if="{{errors.bin}}">{{errors.bin}}</text>
+    </div>
+
+    <div style="height: 50px;"></div>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+import clipboard from '@system.clipboard'
+import prompt from '@system.prompt'
+
+export default {
+  data: {
+    isFormatted: false,
+    hex: '',
+    dec: '',
+    oct: '',
+    bin: '',
+    // Error messages state
+    errors: {
+      hex: '',
+      dec: '',
+      oct: '',
+      bin: ''
+    },
+    // Limits (128-bit approx)
+    LIMITS: {
+      hex: 32,
+      dec: 39,
+      oct: 43,
+      bin: 128
+    }
+  },
+
+  goBack() {
+    router.back()
+  },
+
+  toggleFormat(evt) {
+    this.isFormatted = evt.checked;
+    this.updateAllFromDec(this.cleanInput(this.dec));
+  },
+
+  /**
+   * Generic Validator
+   * @param {string} value - Raw input
+   * @param {string} type - 'hex', 'dec', 'oct', 'bin'
+   * @param {RegExp} validRegex - Allowed chars
+   * @returns {string} - The cleaned value
+   */
+  validateAndProcess(value, type, validRegex) {
+    // 1. Reset error for this type
+    this.errors[type] = '';
+    
+    let val = this.cleanInput(value);
+    
+    // 2. Check Length
+    if (val.length > this.LIMITS[type]) {
+      this.errors[type] = `Too large (Max ${this.LIMITS[type]} chars)`;
+      val = val.substring(0, this.LIMITS[type]);
+    }
+
+    // 3. Check Invalid Characters
+    // If replacement changes the string length, invalid chars were present
+    const originalLength = val.length;
+    const validVal = val.replace(validRegex, '');
+    
+    if (validVal.length < originalLength) {
+      // Only show this error if we didn't already show the length error
+      if (!this.errors[type]) {
+        this.errors[type] = 'Invalid characters ignored';
+      }
+    }
+
+    return validVal;
+  },
+
+  onHexChange(evt) {
+    const validVal = this.validateAndProcess(evt.value, 'hex', /[^0-9a-fA-F]/g);
+    
+    if (!validVal) {
+      this.clearAllExcept('hex'); // Keep error visible if it exists
+      return;
+    }
+
+    try {
+      const bigVal = BigInt('0x' + validVal);
+      this.updateAllFromBigInt(bigVal, 'hex');
+    } catch (e) {
+      this.errors.hex = "Calculation Error";
+    }
+  },
+
+  onDecChange(evt) {
+    const validVal = this.validateAndProcess(evt.value, 'dec', /[^0-9]/g);
+
+    if (!validVal) {
+      this.clearAllExcept('dec');
+      return;
+    }
+
+    try {
+      const bigVal = BigInt(validVal);
+      this.updateAllFromBigInt(bigVal, 'dec');
+    } catch (e) {
+      this.errors.dec = "Calculation Error";
+    }
+  },
+
+  onOctChange(evt) {
+    const validVal = this.validateAndProcess(evt.value, 'oct', /[^0-7]/g);
+
+    if (!validVal) {
+      this.clearAllExcept('oct');
+      return;
+    }
+
+    try {
+      const bigVal = BigInt('0o' + validVal);
+      this.updateAllFromBigInt(bigVal, 'oct');
+    } catch (e) {
+      this.errors.oct = "Calculation Error";
+    }
+  },
+
+  onBinChange(evt) {
+    const validVal = this.validateAndProcess(evt.value, 'bin', /[^0-1]/g);
+
+    if (!validVal) {
+      this.clearAllExcept('bin');
+      return;
+    }
+
+    try {
+      const bigVal = BigInt('0b' + validVal);
+      this.updateAllFromBigInt(bigVal, 'bin');
+    } catch (e) {
+      this.errors.bin = "Calculation Error";
+    }
+  },
+
+  // --- Core Logic ---
+
+  /**
+   * Updates all fields based on a BigInt.
+   * @param {BigInt} bigVal 
+   * @param {string} source - The field currently being typed in (to avoid overwriting cursor/input if desired, though usually we sync all)
+   */
+  updateAllFromBigInt(bigVal, source) {
+    // Clear other errors when a valid calculation happens
+    const keys = ['hex', 'dec', 'oct', 'bin'];
+    keys.forEach(k => {
+      if (k !== source) this.errors[k] = '';
+    });
+
+    let rawHex = bigVal.toString(16).toUpperCase();
+    let rawDec = bigVal.toString(10);
+    let rawOct = bigVal.toString(8);
+    let rawBin = bigVal.toString(2);
+
+    if (this.isFormatted) {
+      this.hex = this.formatString(rawHex, 4);
+      this.dec = this.formatDecimal(rawDec);
+      this.oct = this.formatString(rawOct, 4);
+      this.bin = this.formatString(rawBin, 4);
+    } else {
+      this.hex = rawHex;
+      this.dec = rawDec;
+      this.oct = rawOct;
+      this.bin = rawBin;
+    }
+  },
+
+  updateAllFromDec(cleanDecStr) {
+    if(!cleanDecStr) return;
+    try {
+      this.updateAllFromBigInt(BigInt(cleanDecStr), 'dec');
+    } catch(e) {}
+  },
+
+  clearAllExcept(type) {
+    if (type !== 'hex') this.hex = '';
+    if (type !== 'dec') this.dec = '';
+    if (type !== 'oct') this.oct = '';
+    if (type !== 'bin') this.bin = '';
+  },
+
+  cleanInput(str) {
+    if (!str) return '';
+    return str.toString().replace(/[\s,]/g, '');
+  },
+
+  formatString(str, n) {
+    return str.replace(/\B(?=(\w{4})+(?!\w))/g, " ");
+  },
+
+  formatDecimal(str) {
+    return str.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  },
+
+  pasteTo(type) {
+    clipboard.get({
+      success: (data) => {
+        if (data.text) {
+          const fakeEvt = { value: data.text };
+          // Clear errors before paste
+          this.errors[type] = '';
+          
+          if (type === 'hex') this.onHexChange(fakeEvt);
+          if (type === 'dec') this.onDecChange(fakeEvt);
+          if (type === 'oct') this.onOctChange(fakeEvt);
+          if (type === 'bin') this.onBinChange(fakeEvt);
+          
+          prompt.showToast({ message: 'Pasted' });
+        }
+      }
+    });
+  }
+}
+</script>
+
+<style>
+  /* Layout */
+  .page {
+    flex-direction: column;
+    padding: 0 30px;
+    background-color: #f9f9f9;
+  }
+
+  /* Header */
+  .header {
+    height: 120px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title {
+    font-size: 38px;
+    font-weight: bold;
+    color: #333;
+  }
+  .icon-btn {
+    width: 80px;
+    height: 80px;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .back-icon {
+    font-size: 80px;
+    color: #007aff;
+    margin-top: -10px;
+  }
+  .placeholder { opacity: 0; }
+
+  /* Configuration */
+  .section-title {
+    font-size: 30px;
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 15px;
+    margin-top: 10px;
+  }
+  .card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e5e5;
+    margin-bottom: 20px;
+  }
+  .config-card { padding: 0 20px; }
+  .config-row {
+    height: 100px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .config-label { font-size: 30px; color: #333; }
+
+  /* Input Groups */
+  .input-group {
+    flex-direction: column;
+    margin-bottom: 30px;
+  }
+  .label-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .label { font-size: 28px; color: #333; }
+  .mini-btn {
+    flex-direction: row;
+    align-items: center;
+    padding: 5px 15px;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  .mini-btn-text { font-size: 24px; color: #555; }
+
+  .input-field {
+    width: 100%;
+    height: 90px;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 0 20px;
+    font-size: 30px;
+    color: #333;
+    font-weight: bold;
+  }
+  
+  /* Error State Styling */
+  .input-error {
+    border-color: #d32f2f; /* Red border */
+    background-color: #fff8f8;
+  }
+
+  .error-hint {
+    font-size: 24px;
+    color: #d32f2f;
+    margin-top: 5px;
+    padding-left: 5px;
+  }
+  
+  .multiline {
+    height: 150px; 
+    padding-top: 20px;
+  }
+</style>

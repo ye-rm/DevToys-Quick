@@ -1,0 +1,263 @@
+<template>
+  <div class="page">
+    <!-- Header -->
+    <div class="header">
+      <div class="icon-btn" onclick="goBack">
+        <text class="back-icon">‹</text>
+      </div>
+      <text class="title">JSON Formatter</text>
+      <div class="icon-btn placeholder"></div>
+    </div>
+
+    <!-- Configuration -->
+    <div class="section-title">
+      <text>Indentation</text>
+    </div>
+    <div class="card config-card">
+      <div class="tabs">
+        <text 
+          class="{{indentMode === '2' ? 'tab-item active' : 'tab-item'}}" 
+          onclick="setIndent('2')">2 Spaces</text>
+        <text 
+          class="{{indentMode === '4' ? 'tab-item active' : 'tab-item'}}" 
+          onclick="setIndent('4')">4 Spaces</text>
+        <text 
+          class="{{indentMode === 'tab' ? 'tab-item active' : 'tab-item'}}" 
+          onclick="setIndent('tab')">1 Tab</text>
+        <text 
+          class="{{indentMode === '0' ? 'tab-item active' : 'tab-item'}}" 
+          onclick="setIndent('0')">Minify</text>
+      </div>
+    </div>
+
+    <!-- Input Section -->
+    <div class="section-header-row">
+      <text class="section-title">Input JSON</text>
+      <div class="input-actions">
+        <div class="mini-btn" onclick="pasteFromClipboard">
+          <text class="mini-btn-text">Paste</text>
+        </div>
+        <div class="mini-btn" onclick="clearInput">
+          <text class="mini-btn-text">Clear</text>
+        </div>
+      </div>
+    </div>
+
+    <div class="card input-card">
+      <textarea 
+        class="input-area" 
+        placeholder="Paste your JSON here..." 
+        value="{{inputText}}"
+        onchange="handleInput">
+      </textarea>
+    </div>
+
+    <!-- Main Action Button -->
+    <div class="footer">
+      <input type="button" class="btn" value="Format & Copy" onclick="formatAndCopy" />
+      <text class="hint-text">Result will be copied to clipboard automatically</text>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+import clipboard from '@system.clipboard'
+import prompt from '@system.prompt'
+
+export default {
+  data: {
+    inputText: '',
+    indentMode: '2' 
+  },
+
+  onInit() {},
+
+  goBack() {
+    router.back();
+  },
+
+  handleInput(evt) {
+    this.inputText = evt.value;
+  },
+
+  setIndent(val) {
+    this.indentMode = val;
+  },
+
+  pasteFromClipboard() {
+    clipboard.get({
+      success: (data) => {
+        if (data.text) {
+          this.inputText = data.text;
+          prompt.showToast({ message: 'Pasted from clipboard' });
+        }
+      }
+    });
+  },
+
+  clearInput() {
+    this.inputText = '';
+  },
+
+  formatAndCopy() {
+    if (!this.inputText || this.inputText.trim() === '') {
+      prompt.showToast({ message: 'Please enter JSON first' });
+      return;
+    }
+
+    try {
+      const jsonObj = JSON.parse(this.inputText);
+      
+      let spaceArg;
+      if (this.indentMode === 'tab') {
+        spaceArg = '\t';
+      } else {
+        spaceArg = parseInt(this.indentMode);
+      }
+
+      const formattedResult = JSON.stringify(jsonObj, null, spaceArg);
+
+      clipboard.set({
+        text: formattedResult,
+        success: () => {
+          prompt.showToast({ message: '✅ Formatted & Copied!' });
+        },
+        fail: () => {
+          prompt.showToast({ message: 'Failed to copy' });
+        }
+      });
+
+    } catch (e) {
+      prompt.showToast({ 
+        message: '❌ Invalid JSON: ' + e.message,
+        duration: 1 
+      });
+    }
+  }
+}
+</script>
+
+<style>
+  /* --- Layout --- */
+  .page {
+    flex-direction: column;
+    padding: 0 30px 50px 30px;
+    background-color: #f9f9f9;
+  }
+
+  /* --- Header --- */
+  .header {
+    height: 120px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title {
+    font-size: 38px;
+    font-weight: bold;
+    color: #333;
+  }
+  .icon-btn {
+    width: 80px;
+    height: 80px;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .back-icon {
+    font-size: 80px;
+    color: #007aff;
+    margin-top: -10px;
+  }
+  .placeholder { opacity: 0; }
+
+  /* --- Configuration (Improved Tabs) --- */
+  .section-title {
+    font-size: 30px;
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+  .card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e5e5;
+    margin-bottom: 30px;
+  }
+  .config-card {
+    padding: 10px;
+  }
+
+  .tabs {
+    width: 100%; /* FIX: Ensure it fills the card width */
+    flex-direction: row;
+    background-color: #f0f2f5; /* Slightly better contrast gray */
+    border-radius: 14px;
+    height: 90px; /* Taller for better touch targets */
+    padding: 6px;
+  }
+
+  .tab-item {
+    flex: 1; /* FIX: Distribute space equally (25% each) */
+    text-align: center;
+    font-size: 26px; 
+    color: #666;
+    border-radius: 10px;
+    height: 100%;
+    /* FIX: Center text vertically using line-height equal to container height minus padding */
+    line-height: 78px; 
+  }
+
+  .active {
+    background-color: #ffffff;
+    color: #007aff;
+    font-weight: bold;
+  }
+
+  /* --- Inputs & Buttons --- */
+  .section-header-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 15px;
+  }
+  .input-actions { flex-direction: row; }
+  .mini-btn {
+    margin-left: 20px;
+    padding: 5px 20px;
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 10px;
+  }
+  .mini-btn-text { font-size: 24px; color: #555; }
+
+  .input-card { padding: 0; }
+  .input-area {
+    width: 100%;
+    height: 500px;
+    padding: 20px;
+    font-size: 28px;
+    color: #333;
+    font-family: monospace;
+  }
+
+  .footer { 
+    margin-top: 20px; 
+    flex-direction: column;
+    align-items: center;
+  }
+  .btn {
+    height: 100px;
+    width: 100%;
+    background-color: #007aff;
+    color: #ffffff;
+    font-size: 36px;
+    font-weight: bold;
+    border-radius: 15px;
+  }
+  .hint-text {
+    margin-top: 20px;
+    font-size: 24px;
+    color: #888;
+  }
+</style>

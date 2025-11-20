@@ -1,0 +1,388 @@
+<template>
+  <div class="page">
+    <!-- Header -->
+    <div class="header">
+      <div class="icon-btn" onclick="goBack">
+        <text class="back-icon">‹</text>
+      </div>
+      <text class="title">XML Formatter</text>
+      <div class="icon-btn placeholder"></div>
+    </div>
+
+    <!-- Configuration -->
+    <div class="section-title">
+      <text>Configuration</text>
+    </div>
+    <div class="card config-card">
+      
+      <!-- Row 1: Indentation Tabs -->
+      <div class="tabs">
+        <text 
+          class="{{indentMode === '2' ? 'tab-item active' : 'tab-item'}}" 
+          onclick="setIndent('2')">2 Spaces</text>
+        <text 
+          class="{{indentMode === '4' ? 'tab-item active' : 'tab-item'}}" 
+          onclick="setIndent('4')">4 Spaces</text>
+        <text 
+          class="{{indentMode === 'tab' ? 'tab-item active' : 'tab-item'}}" 
+          onclick="setIndent('tab')">1 Tab</text>
+        <text 
+          class="{{indentMode === '0' ? 'tab-item active' : 'tab-item'}}" 
+          onclick="setIndent('0')">Minify</text>
+      </div>
+
+      <!-- Row 2: Attributes on New Line (Only active if not minified) -->
+      <div class="config-row">
+        <text class="{{indentMode === '0' ? 'config-label disabled-text' : 'config-label'}}">Attributes on new line</text>
+        <switch 
+          checked="{{attributesOnNewLine}}" 
+          onchange="toggleAttributes"
+          disabled="{{indentMode === '0'}}">
+        </switch>
+      </div>
+
+    </div>
+
+    <!-- Input Section -->
+    <div class="section-header-row">
+      <text class="section-title">Input XML</text>
+      <div class="input-actions">
+        <div class="mini-btn" onclick="pasteFromClipboard">
+          <text class="mini-btn-text">Paste</text>
+        </div>
+        <div class="mini-btn" onclick="clearInput">
+          <text class="mini-btn-text">Clear</text>
+        </div>
+      </div>
+    </div>
+
+    <div class="card input-card">
+      <textarea 
+        class="input-area" 
+        placeholder="<root><child>Content</child></root>" 
+        value="{{inputText}}"
+        onchange="handleInput">
+      </textarea>
+    </div>
+
+    <!-- Main Action Button -->
+    <div class="footer">
+      <input type="button" class="btn" value="Format & Copy" onclick="formatAndCopy" />
+      <text class="hint-text">Result will be copied to clipboard automatically</text>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+import clipboard from '@system.clipboard'
+import prompt from '@system.prompt'
+
+export default {
+  data: {
+    inputText: '',
+    indentMode: '2',
+    attributesOnNewLine: false
+  },
+
+  goBack() {
+    router.back();
+  },
+
+  handleInput(evt) {
+    this.inputText = evt.value;
+  },
+
+  setIndent(val) {
+    this.indentMode = val;
+  },
+
+  toggleAttributes(evt) {
+    if (this.indentMode === '0') return;
+    this.attributesOnNewLine = evt.checked;
+  },
+
+  pasteFromClipboard() {
+    clipboard.get({
+      success: (data) => {
+        if (data.text) {
+          this.inputText = data.text;
+          prompt.showToast({ message: 'Pasted' });
+        }
+      }
+    });
+  },
+
+  clearInput() {
+    this.inputText = '';
+  },
+
+  /**
+   * Core Logic: Format and Copy
+   */
+  formatAndCopy() {
+    if (!this.inputText || this.inputText.trim() === '') {
+      prompt.showToast({ message: 'Please enter XML first' });
+      return;
+    }
+
+    try {
+      const result = this.processXML(this.inputText);
+      
+      clipboard.set({
+        text: result,
+        success: () => {
+          prompt.showToast({ message: '✅ Formatted & Copied!' });
+        },
+        fail: () => {
+          prompt.showToast({ message: 'Failed to copy' });
+        }
+      });
+    } catch (e) {
+      prompt.showToast({ message: '❌ Error: ' + e.message });
+    }
+  },
+
+  /**
+   * XML Formatter Engine
+   */
+  processXML(xml) {
+    // 1. Minify (remove extra whitespace)
+    let formatted = xml.replace(/>\s*</g, '><').trim();
+    
+    // If mode is Minify, return immediately
+    if (this.indentMode === '0') {
+      return formatted;
+    }
+
+    // 2. Determine Indentation String
+    let indentStr = '  '; // Default 2 spaces
+    if (this.indentMode === '4') indentStr = '    ';
+    if (this.indentMode === 'tab') indentStr = '\t';
+
+    // 3. Formatting Logic
+    let result = '';
+    let currentIndentLevel = 0;
+    
+    // Split xml by tags
+    const parts = formatted.split(/(?=<)/);
+    
+    parts.forEach(part => {
+      let change = 0;
+      let isClosing = false;
+      let isSelfClosing = false;
+      let isOpening = false;
+
+      if (part.startsWith('</')) {
+        // Closing tag </tag>
+        isClosing = true;
+        change = -1;
+      } else if (part.startsWith('<?') || part.startsWith('<!')) {
+        // Meta tags <?xml ... ?> or Comments <!-- ... -->
+        change = 0; 
+      } else if (part.search(/<.*?\/>/) !== -1) {
+         // Self closing <tag />
+         isSelfClosing = true;
+         change = 0;
+      } else if (part.startsWith('<')) {
+        // Opening tag <tag>
+        isOpening = true;
+        change = 1;
+      }
+
+      // Adjust indentation for closing tag BEFORE adding string
+      if (isClosing) currentIndentLevel += change;
+      if (currentIndentLevel < 0) currentIndentLevel = 0;
+
+      // Create indent string
+      let padding = '';
+      for(let i=0; i<currentIndentLevel; i++) padding += indentStr;
+
+      // --- Attributes on New Line Logic ---
+      if (this.attributesOnNewLine && (isOpening || isSelfClosing)) {
+        // Find the closing bracket
+        const closeIdx = part.indexOf('>');
+        if (closeIdx > -1) {
+          let tagContent = part.substring(0, closeIdx + 1);
+          let textContent = part.substring(closeIdx + 1);
+
+          // Replace spaces followed by attributes with newline + extra indent
+          // Logic: Match space that is not inside quotes
+          // Regex explanation: Space followed by something="...
+          const attrIndent = padding + indentStr;
+          
+          // Split tag by spaces to separate attributes (naive but works for most cases)
+          // A robust regex for attributes: /(\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?/g
+          // Simplified: replace space between attributes with newline
+          
+          // 1. Extract Tag Name
+          const firstSpace = tagContent.indexOf(' ');
+          if (firstSpace > -1 && firstSpace < tagContent.length - 2) {
+            const tagName = tagContent.substring(0, firstSpace);
+            let attrs = tagContent.substring(firstSpace, tagContent.length - 1); // strip >
+            
+            // Replace spaces between attributes
+            // Note: This simple regex might break if attribute values contain spaces. 
+            // For a utility tool, we try to be safe: match space followed by word=
+            attrs = attrs.replace(/\s+(\w+[:\-\w]*\s*=\s*)/g, '\n' + attrIndent + '$1');
+            
+            tagContent = tagName + attrs + (isSelfClosing ? '/>' : '>');
+          }
+          part = tagContent + textContent;
+        }
+      }
+      // ------------------------------------
+
+      result += padding + part + '\n';
+
+      // Adjust indentation for opening tag AFTER adding string
+      if (!isClosing && !isSelfClosing) currentIndentLevel += change;
+    });
+
+    return result.trim();
+  }
+}
+</script>
+
+<style>
+  /* --- Layout --- */
+  .page {
+    flex-direction: column;
+    padding: 0 30px 50px 30px;
+    background-color: #f9f9f9;
+  }
+
+  /* --- Header --- */
+  .header {
+    height: 120px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title {
+    font-size: 38px;
+    font-weight: bold;
+    color: #333;
+  }
+  .icon-btn {
+    width: 80px;
+    height: 80px;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .back-icon {
+    font-size: 80px;
+    color: #007aff;
+    margin-top: -10px;
+  }
+  .placeholder { opacity: 0; }
+
+  /* --- Configuration --- */
+  .section-title {
+    font-size: 30px;
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+  .card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e5e5;
+    margin-bottom: 30px;
+  }
+  .config-card {
+    padding: 10px;
+    flex-direction: column;
+  }
+
+  /* Row 1: Tabs */
+  .tabs {
+    width: 100%;
+    flex-direction: row;
+    background-color: #f0f2f5;
+    border-radius: 14px;
+    height: 90px;
+    padding: 6px;
+    margin-bottom: 10px; /* Space before next row */
+  }
+  .tab-item {
+    flex: 1;
+    text-align: center;
+    font-size: 26px; 
+    color: #666;
+    border-radius: 10px;
+    height: 100%;
+    line-height: 78px;
+  }
+  .active {
+    background-color: #ffffff;
+    color: #007aff;
+    font-weight: bold;
+  }
+
+  /* Row 2: Attribute Switch */
+  .config-row {
+    height: 100px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    border-top-width: 1px;
+    border-top-color: #f0f0f0;
+  }
+  .config-label {
+    font-size: 30px;
+    color: #333;
+  }
+  .disabled-text {
+    color: #bbb;
+  }
+
+  /* --- Input --- */
+  .section-header-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 15px;
+  }
+  .input-actions { flex-direction: row; }
+  .mini-btn {
+    margin-left: 20px;
+    padding: 5px 20px;
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 10px;
+  }
+  .mini-btn-text { font-size: 24px; color: #555; }
+
+  .input-card { padding: 0; }
+  .input-area {
+    width: 100%;
+    height: 500px;
+    padding: 20px;
+    font-size: 28px;
+    color: #333;
+    font-family: monospace;
+  }
+
+  /* --- Footer --- */
+  .footer { 
+    margin-top: 20px; 
+    flex-direction: column;
+    align-items: center;
+  }
+  .btn {
+    height: 100px;
+    width: 100%;
+    background-color: #007aff;
+    color: #ffffff;
+    font-size: 36px;
+    font-weight: bold;
+    border-radius: 15px;
+  }
+  .hint-text {
+    margin-top: 20px;
+    font-size: 24px;
+    color: #888;
+  }
+</style>

@@ -5,12 +5,22 @@ export default {
         name: 'Base64 编解码',
         icon: '/assets/icons/base64.svg',
         route: '/pages/base64'
+      },      
+      {
+        name: '进制转换',
+        icon: '/assets/icons/numbase.svg',
+        route: '/pages/number-base'
       },
-      // {
-      //   name: 'JSON 格式化',
-      //   icon: '/assets/icons/json.svg',
-      //   route: '/pages/json-formatter'
-      // },
+      {
+        name: 'JSON 格式化',
+        icon: '/assets/icons/json.svg',
+        route: '/pages/json-formatter'
+      },
+      {
+        name: "XML 格式化",
+        icon: '/assets/icons/xml.svg',
+        route: 'pages/xml-formatter'
+      },
       // {
       //   name: '正则测试器',
       //   icon: '/assets/icons/regex.svg',
@@ -26,15 +36,15 @@ export default {
       //   icon: '/assets/icons/markdown.svg',
       //   route: '/pages/markdown-preview'
       // },
-      // {
-      //   name: '进制转换',
-      //   icon: '/assets/icons/numbase.svg',
-      //   route: '/pages/number-base'
-      // },
-      // {
-      //   name: "哈希生成",
-      //   icon: '/assets/icons/hash.svg',
-      //   route: '/pages/hash-gen'
-      // }
+      {
+        name: "哈希生成",
+        icon: '/assets/icons/hash.svg',
+        route: '/pages/hash-gen'
+      },
+      {
+        name: "检验和生成",
+        icon: '/assets/icons/checksum.svg',
+        route: '/pages/checksum'
+      }
     ]
   };

@@ -1,0 +1,281 @@
+<template>
+  <div class="page">
+    <!-- Header -->
+    <div class="header">
+      <div class="icon-btn" onclick="goBack">
+        <text class="back-icon">‹</text>
+      </div>
+      <text class="title">File Checksum</text>
+      <div class="icon-btn placeholder"></div>
+    </div>
+
+    <!-- File Selection Section -->
+    <div class="card action-card">
+      <image class="upload-icon" src="/assets/icons/upload.svg"></image>
+      <text class="action-title" if="{{!fileName}}">Select a file to hash</text>
+      <text class="file-name" if="{{fileName}}">{{fileName}}</text>
+      <text class="file-size" if="{{fileSize}}">{{fileSize}}</text>
+      
+      <input type="button" class="btn-select" value="Pick File" onclick="pickFile" />
+    </div>
+
+    <!-- Loading Indicator -->
+    <div class="loading-container" if="{{isProcessing}}">
+      <progress type="circular" class="loading-spinner"></progress>
+      <text class="loading-text">Calculating Checksums...</text>
+    </div>
+
+    <!-- Results Section -->
+    <div class="output-group" if="{{hashes.md5}}">
+      
+      <text class="label">MD5</text>
+      <div class="output-row">
+        <text class="hash-text">{{hashes.md5}}</text>
+        <div class="copy-btn" onclick="copyHash(hashes.md5)">
+          <text class="copy-icon">📋</text>
+        </div>
+      </div>
+
+      <text class="label">SHA1</text>
+      <div class="output-row">
+        <text class="hash-text">{{hashes.sha1}}</text>
+        <div class="copy-btn" onclick="copyHash(hashes.sha1)">
+          <text class="copy-icon">📋</text>
+        </div>
+      </div>
+
+      <text class="label">SHA256</text>
+      <div class="output-row">
+        <text class="hash-text">{{hashes.sha256}}</text>
+        <div class="copy-btn" onclick="copyHash(hashes.sha256)">
+          <text class="copy-icon">📋</text>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+import media from '@system.media'
+import file from '@system.file'
+import prompt from '@system.prompt'
+import clipboard from '@system.clipboard'
+import CryptoJS from 'crypto-js'
+
+export default {
+  data: {
+    fileName: '',
+    fileSize: '',
+    isProcessing: false,
+    hashes: {
+      md5: '',
+      sha1: '',
+      sha256: ''
+    }
+  },
+
+  goBack() {
+    router.back()
+  },
+
+  pickFile() {
+    media.pickFile({
+      success: (data) => {
+        this.fileName = data.name || 'Selected File'; // Some devices don't return name
+        // Display size if available, otherwise generic text
+        this.fileSize = data.size ? (data.size / 1024).toFixed(2) + ' KB' : '';
+        
+        // Start processing the file URI
+        this.processFile(data.uri);
+      },
+      fail: (erromsg, errorcode) => {
+        if (errorcode !== 202) { // 202 usually means user cancelled
+          prompt.showToast({ message: 'Failed to pick file' });
+        }
+      }
+    })
+  },
+
+  processFile(uri) {
+    this.isProcessing = true;
+    this.clearHashes();
+
+    // QuickApp standard: readArrayBuffer
+    file.readArrayBuffer({
+      uri: uri,
+      success: (data) => {
+        try {
+          const buffer = data.buffer;
+          
+          // Warning for large files (CryptoJS is slow/memory-heavy for >10MB on phones)
+          if (buffer.byteLength > 10 * 1024 * 1024) {
+            prompt.showToast({ message: 'File too large (Limit 10MB)' });
+            this.isProcessing = false;
+            return;
+          }
+
+          // 1. Convert ArrayBuffer to CryptoJS WordArray
+          const wordArray = this.arrayBufferToWordArray(buffer);
+
+          // 2. Calculate Hashes
+          this.hashes.md5 = CryptoJS.MD5(wordArray).toString().toUpperCase();
+          this.hashes.sha1 = CryptoJS.SHA1(wordArray).toString().toUpperCase();
+          this.hashes.sha256 = CryptoJS.SHA256(wordArray).toString().toUpperCase();
+
+        } catch (e) {
+          prompt.showToast({ message: 'Error calculating hash' });
+        }
+        this.isProcessing = false;
+      },
+      fail: (data, code) => {
+        prompt.showToast({ message: `Read failed: ${code}` });
+        this.isProcessing = false;
+      }
+    })
+  },
+
+  /**
+   * Helper: Convert native ArrayBuffer to CryptoJS WordArray
+   */
+  arrayBufferToWordArray(arrayBuffer) {
+    const i8a = new Uint8Array(arrayBuffer);
+    const a = [];
+    for (let i = 0; i < i8a.length; i += 4) {
+      // Combine 4 bytes into one 32-bit word
+      a.push(
+        (i8a[i] << 24) | 
+        (i8a[i + 1] << 16) | 
+        (i8a[i + 2] << 8) | 
+        (i8a[i + 3])
+      );
+    }
+    // Handle remaining bytes if length is not multiple of 4
+    // (Basic implementation, CryptoJS handles padding usually, but this is safer for raw)
+    return CryptoJS.lib.WordArray.create(a, i8a.length);
+  },
+
+  clearHashes() {
+    this.hashes = { md5: '', sha1: '', sha256: '' };
+  },
+
+  copyHash(text) {
+    if (!text) return;
+    clipboard.set({
+      text: text,
+      success: () => prompt.showToast({ message: 'Copied!' })
+    })
+  }
+}
+</script>
+
+<style>
+  .page {
+    flex-direction: column;
+    padding: 0 30px 50px 30px;
+    background-color: #f9f9f9;
+  }
+
+  .header {
+    height: 120px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title {
+    font-size: 38px;
+    font-weight: bold;
+    color: #333;
+  }
+  .icon-btn {
+    width: 80px;
+    height: 80px;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .back-icon {
+    font-size: 80px;
+    color: #007aff;
+    margin-top: -10px;
+  }
+  .placeholder { opacity: 0; }
+
+  /* File Selection Card */
+  .action-card {
+    flex-direction: column;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 30px;
+    border: 1px solid #e5e5e5;
+  }
+  .upload-icon {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 20px;
+    /* Assuming you have an upload.svg, else remove/replace */
+    background-color: #f0f0f0; 
+    border-radius: 50px;
+  }
+  .action-title { font-size: 30px; color: #333; font-weight: bold; margin-bottom: 10px; }
+  .file-name { font-size: 32px; color: #007aff; font-weight: bold; margin-bottom: 10px; text-align: center; }
+  .file-size { font-size: 26px; color: #888; margin-bottom: 30px; }
+  
+  .btn-select {
+    width: 250px;
+    height: 80px;
+    background-color: #007aff;
+    color: #ffffff;
+    font-size: 30px;
+    border-radius: 40px;
+  }
+
+  /* Loading */
+  .loading-container {
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+  }
+  .loading-spinner {
+    width: 60px;
+    height: 60px;
+    color: #007aff;
+  }
+  .loading-text { font-size: 26px; color: #666; margin-top: 10px; }
+
+  /* Output Section */
+  .output-group { flex-direction: column; }
+  .label {
+    font-size: 26px;
+    color: #666;
+    margin-bottom: 10px;
+    margin-top: 10px;
+  }
+  .output-row {
+    flex-direction: row;
+    background-color: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 10px 20px;
+    align-items: center;
+    height: 100px;
+    margin-bottom: 15px;
+  }
+  .hash-text {
+    flex: 1;
+    font-size: 26px; /* Smaller font for long hashes */
+    color: #444;
+    lines: 1;
+    text-overflow: ellipsis;
+  }
+  .copy-btn {
+    width: 80px;
+    height: 80px;
+    justify-content: flex-end;
+    align-items: center;
+    margin-left: 10px;
+  }
+  .copy-icon { font-size: 40px; }
+</style>

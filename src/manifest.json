@@ -1,24 +1,21 @@
 {
-  "package": "com.devtoys.quick",
-  "name": "DevToys Quick",
+  "package": "com.devtoys.quickapp",
+  "name": "DevToys",
   "versionName": "1.0.0",
   "versionCode": 1,
-  "minPlatformVersion": 1090,
+  "minPlatformVersion": 1050,
   "icon": "/assets/images/logo.png",
-  "description": "开发者常用工具集合：JSON 格式化、Base64 编解码、正则测试、密码生成等，支持语音输入。",
   "features": [
-    { "name": "system.media" },
     { "name": "system.clipboard" },
-    { "name": "system.prompt" }
+    { "name": "system.prompt" },
+    { "name": "system.router" },
+    { "name": "system.media" },
+    { "name": "system.file" }
   ],
   "permissions": [
-    {
-      "name": "ohos.permission.MICROPHONE"
-    }
+    { "origin": "*" }
   ],
-  "config": {
-    "logLevel": "debug"
-  },
+  "config": {},
   "router": {
     "entry": "pages/home/index",
     "pages": {
@@ -29,6 +26,9 @@
         "component": "index"
       },
       "pages/json-formatter": {
+        "component": "index"
+      },
+      "pages/xml-formatter": {
         "component": "index"
       },
       "pages/regex-tester": {
@@ -42,12 +42,19 @@
       },
       "pages/number-base": {
         "component": "index"
+      },
+      "pages/hash-gen": {
+        "component": "index"
+      },
+      "pages/checksum": {
+        "component": "index"
       }
     }
   },
   "display": {
-    "titleBar": true,
-    "titleBarText": "DevToys Quick",
-    "menu": false
+    "themeMode": 0,
+    "backgroundColor": "#ffffff",
+    "titleBarBackgroundColor": "#ffffff",
+    "titleBarTextColor": "#000000"
   }
 }
