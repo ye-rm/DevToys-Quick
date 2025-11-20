@@ -37,7 +37,7 @@
 - 派生项目 **禁止使用** 快应用广告相关 API
 - 违规将导致自动终止许可
 
-详情请查看仓库根目录的 [`LICENSE`](./LICENSE)。
+详见 [`LICENSE`](./LICENSE) 文件或[KAPP-Restricted License](https://github.com/ye-rm/LICENSE-KAPP-R)了解关于License的更多信息。
 
 ------
 
