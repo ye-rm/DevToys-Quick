@@ -40,7 +40,7 @@ It is MIT-based but includes additional restrictions:
 - Derivative works **must not use** Quick App advertising-related APIs
 - Violation results in automatic termination of the granted rights
 
-See the [`LICENSE`](./LICENSE) file for full details.
+See the [`LICENSE`](./LICENSE) file or [KAPP-Restricted License](https://github.com/ye-rm/LICENSE-KAPP-R) for full details.
 
 ------
 
