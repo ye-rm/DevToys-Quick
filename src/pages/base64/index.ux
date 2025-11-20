@@ -6,7 +6,6 @@
         <text class="back-icon">‹</text>
       </div>
       <text class="title">Base64 Converter</text>
-      <!-- Invisible spacer to balance the header so title stays centered -->
       <div class="icon-btn placeholder"></div>
     </div>
 
@@ -41,9 +40,11 @@
 </template>
 
 <script>
+import router from '@system.router'
 import clipboard from '@system.clipboard'
 import prompt from '@system.prompt'
-import router from '@system.router' // 1. Imported Router
+// 1. Import CryptoJS to handle Base64 properly
+import CryptoJS from 'crypto-js'
 
 export default {
   data: {
@@ -52,9 +53,6 @@ export default {
     outputText: ''
   },
 
-  /**
-   * 2. Added Navigation Logic
-   */
   goBack() {
     router.back();
   },
@@ -62,6 +60,7 @@ export default {
   setMode(newMode) {
     if (this.mode === newMode) return;
     this.mode = newMode;
+    // Clear fields on mode switch
     this.inputText = '';
     this.outputText = '';
   },
@@ -76,19 +75,27 @@ export default {
       this.outputText = '';
       return;
     }
+
     try {
       if (this.mode === 'encode') {
-        this.outputText = btoa(encodeURIComponent(this.inputText).replace(/%([0-9A-F]{2})/g,
-          function toSolidBytes(match, p1) {
-            return String.fromCharCode('0x' + p1);
-        }));
+        // 2. ENCODE: Parse string as UTF-8, then turn to Base64
+        const wordArry = CryptoJS.enc.Utf8.parse(this.inputText);
+        this.outputText = CryptoJS.enc.Base64.stringify(wordArry);
       } else {
-        this.outputText = decodeURIComponent(atob(this.inputText).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
+        // 3. DECODE: Parse Base64, then turn to UTF-8 string
+        const parsedWordArray = CryptoJS.enc.Base64.parse(this.inputText);
+        // Convert back to string (Handles emojis/Chinese correctly)
+        this.outputText = CryptoJS.enc.Utf8.stringify(parsedWordArray);
+        
+        // Optional: If output is empty but input wasn't, it might be binary data
+        if (!this.outputText && this.inputText) {
+           // Fallback for binary data if needed, usually Hex is better for binary
+           // this.outputText = CryptoJS.enc.Hex.stringify(parsedWordArray);
+        }
       }
     } catch (e) {
-      this.outputText = "Error: Invalid input";
+      // Handle Malformed Input
+      this.outputText = "Error: Invalid input format";
     }
   },
 
@@ -110,16 +117,15 @@ export default {
 <style>
   .page {
     flex-direction: column;
-    padding: 0 30px 30px 30px; /* Adjusted padding */
+    padding: 0 30px 30px 30px;
     background-color: #f8f9fa;
   }
 
-  /* 3. Updated Header Styles for Layout */
   .header {
     height: 120px;
-    flex-direction: row; /* Align items horizontally */
+    flex-direction: row;
     align-items: center;
-    justify-content: space-between; /* Space between Back, Title, Placeholder */
+    justify-content: space-between;
     margin-bottom: 20px;
   }
 
@@ -130,26 +136,21 @@ export default {
     text-align: center;
   }
 
-  /* Back Button Styles */
   .icon-btn {
     width: 80px;
     height: 80px;
-    justify-content: flex-start; /* Align icon to left */
+    justify-content: flex-start;
     align-items: center;
   }
 
   .back-icon {
-    font-size: 80px; /* Large arrow size */
+    font-size: 80px;
     color: #007aff;
-    margin-top: -10px; /* Slight visual correction for the font vertical align */
+    margin-top: -10px;
   }
 
-  /* Placeholder just keeps the title centered */
-  .placeholder {
-    opacity: 0;
-  }
+  .placeholder { opacity: 0; }
 
-  /* Rest of the styles remain the same */
   .tabs {
     flex-direction: row;
     background-color: #e0e0e0;
@@ -168,6 +169,7 @@ export default {
 
   .active {
     background-color: #ffffff;
+    box-shadow: 0px 2px 5px rgba(0,0,0,0.1); 
   }
 
   .tab-text {
