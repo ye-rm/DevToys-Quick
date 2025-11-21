@@ -2,9 +2,9 @@
 
 ------
 
-# 📱 灵感（Quick App）
+# 📱 灵感
 
-灵感是一款基于 **快应用（Quick App）** 开发的多功能工具箱类应用，其灵感、设计风格与部分功能均参考自优秀的开源项目 **DevToys**（https://github.com/DevToys-app/DevToys）。
+灵感、设计风格与部分功能均参考自优秀的开源项目 **DevToys**（https://github.com/DevToys-app/DevToys）。
  在此基础上，本项目对整体交互、移动端适配与 Quick App 特性进行了重设计，使其更适合作为移动端轻量工具合集使用。
 
 ------
