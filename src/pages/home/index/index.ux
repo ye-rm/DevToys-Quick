@@ -11,8 +11,8 @@
   <div class="page-container">
     <!-- Header Area -->
     <div class="header">
-      <text class="app-title">DevToys</text>
-      <text class="app-subtitle">Developers' Swiss Army Knife</text>
+      <text class="app-title">DevToys-Quick</text>
+      <text class="app-subtitle">A Quick App implementation of DevToys</text>
     </div>
 
     <!-- Tools Grid -->

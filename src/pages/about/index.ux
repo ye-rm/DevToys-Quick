@@ -22,7 +22,7 @@
     <!-- Branding / Hero Section -->
     <div class="hero-section">
       <image class="app-logo" src="/assets/images/logo.png"></image>
-      <text class="app-name">Devtoys-Quick</text>
+      <text class="app-name">DevToys-Quick</text>
       <text class="app-version">v{{ versionStr }}</text>
 
       <!-- NEW: GitHub Project Link -->

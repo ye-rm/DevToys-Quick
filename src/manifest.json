@@ -1,7 +1,7 @@
 {
   "package": "com.devtoys.quickapp",
-  "name": "DevToys",
-  "versionName": "1.0.1",
+  "name": "DevToys-Quick",
+  "versionName": "1.0.2",
   "versionCode": 1,
   "minPlatformVersion": 1080,
   "icon": "/assets/images/logo.png",
