@@ -1,4 +1,7 @@
+// SPDX-License-Identifier: KAPP-R-1.0
+// https://github.com/ye-rm/LICENSE-KAPP-R
 // src/common/constants.js
+
 export default {
     TOOLS: [
       {
@@ -45,6 +48,11 @@ export default {
         name: "检验和生成",
         icon: '/assets/icons/checksum.svg',
         route: '/pages/checksum'
+      },
+      {
+        name: "系统信息",
+        icon: '/assets/icons/system-info.svg',
+        route: '/pages/system-info'
       }
     ]
   };

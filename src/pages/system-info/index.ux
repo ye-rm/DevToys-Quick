@@ -1,0 +1,366 @@
+<!--SPDX-License-Identifier: KAPP-R-1.0 -->
+<!--https://github.com/ye-rm/LICENSE-KAPP-R -->
+<template>
+  <div class="page">
+    <!-- Header -->
+    <div class="header">
+      <div class="icon-btn" onclick="goBack">
+        <text class="back-icon">‹</text>
+      </div>
+      <text class="title">System Info</text>
+      <div class="icon-btn placeholder"></div>
+    </div>
+
+    <!-- 1. Device Card -->
+    <div class="section-title">
+      <text>Device</text>
+    </div>
+    <div class="card">
+      <div class="info-row border-bottom">
+        <text class="label">Brand</text>
+        <text class="value">{{info.brand}}</text>
+      </div>
+      <div class="info-row border-bottom">
+        <text class="label">Model</text>
+        <text class="value">{{info.model}}</text>
+      </div>
+      <div class="info-row border-bottom">
+        <text class="label">Storage</text>
+        <text class="value">{{storageInfo.text}}</text>
+      </div>
+      <!-- <div class="info-row border-bottom">
+        <text class="label">Arch</text>
+        <text class="value">{{CPU.info}}</text>
+      </div> -->
+      <div class="info-row">
+        <text class="label">Product</text>
+        <text class="value">{{info.product}}</text>
+      </div>
+    </div>
+
+    <!-- 2. Network Card -->
+    <div class="section-title">
+      <text>Network</text>
+    </div>
+    <div class="card">
+      <div class="info-row border-bottom">
+        <text class="label">Connection Type</text>
+        <text class="value highlight">{{networkInfo.type.toUpperCase()}}</text>
+      </div>
+      <div class="info-row">
+        <text class="label">Metered Connection</text>
+        <text class="value">{{networkInfo.metered ? 'Yes (Data Charges)' : 'No'}}</text>
+      </div>
+    </div>
+
+    <!-- 3. Software Card -->
+    <div class="section-title">
+      <text>Software</text>
+    </div>
+    <div class="card">
+      <div class="info-row border-bottom">
+        <text class="label">OS Type</text>
+        <text class="value">{{info.osType}}</text>
+      </div>
+      <div class="info-row border-bottom">
+        <text class="label">OS Version</text>
+        <text class="value">{{info.osVersionName}}</text>
+      </div>
+      <div class="info-row border-bottom">
+        <text class="label">Platform Ver</text>
+        <text class="value">{{info.platformVersionName}}</text>
+      </div>
+      <div class="info-row border-bottom">
+        <text class="label">Vendor OS Name</text>
+        <text class="value">{{info.vendorOsName}}</text>
+      </div>
+      <div class="info-row border-bottom">
+        <text class="label">Vendor OS Version</text>
+        <text class="value">{{info.vendorOsVersion}}</text>
+      </div>
+      <div class="info-row">
+        <text class="label">Language</text>
+        <text class="value">{{info.language}}-{{info.region}}</text>
+      </div>
+    </div>
+
+    <!-- 4. Display Card -->
+    <div class="section-title">
+      <text>Display</text>
+    </div>
+    <div class="card">
+      <div class="info-row border-bottom">
+        <text class="label">Resolution</text>
+        <text class="value">{{info.screenWidth}} x {{info.screenHeight}}</text>
+      </div>
+      <div class="info-row">
+        <text class="label">Density</text>
+        <text class="value">{{info.screenDensity}}</text>
+      </div>
+    </div>
+
+    <!-- 5. Battery Card -->
+    <div class="section-title">
+      <text>Battery</text>
+    </div>
+    <div class="card">
+      <div class="info-row border-bottom">
+        <text class="label">Level</text>
+        <text class="value highlight">{{battery.level}}</text>
+      </div>
+      <div class="info-row">
+        <text class="label">Status</text>
+        <text class="value">{{battery.charging ? 'Charging ⚡' : 'Discharging'}}</text>
+      </div>
+    </div>
+    
+    <div style="height: 50px;"></div>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+import device from '@system.device'
+import battery from '@system.battery'
+import network from '@system.network'
+import prompt from '@system.prompt'
+
+export default {
+  data: {
+    info: {
+      brand: '-',
+      model: '-',
+      product: '-',
+      osType: '-',
+      osVersionName: '-',
+      platformVersionName: '-',
+      language: '-',
+      region: '-',
+      screenWidth: 0,
+      screenHeight: 0,
+      screenDensity: 0,
+      vendorOsName: '-',
+      vendorOsVersion: '-'
+    },
+    battery: {
+      level: '-',
+      charging: false
+    },
+    networkInfo: {
+      type: '-',
+      metered: false
+    },
+    storageInfo: {
+      text: '-/- GB',
+      totalRaw: 0,
+      availableRaw: 0
+    },
+    CPU:{
+      info: '-'
+    }
+  },
+
+  onInit() {
+    this.getDeviceInfo();
+    this.getCpuInfo();
+    this.getStorageInfo();
+    this.getBatteryInfo();
+    this.getNetworkInfo();
+    this.subscribeNetwork(); 
+  },
+
+  onDestroy() {
+    network.unsubscribe(); 
+  },
+
+  goBack() {
+    router.back()
+  },
+
+  getDeviceInfo() {
+    device.getInfo({
+      success: (data) => {
+        this.info = {
+          brand: data.brand || '-',
+          model: data.model || '-',
+          product: data.product || '-',
+          osType: data.osType || '-',
+          osVersionName: data.osVersionName || '-',
+          platformVersionName: data.platformVersionName || '-',
+          language: data.language || '-',
+          region: data.region || '-',
+          screenWidth: data.screenWidth,
+          screenHeight: data.screenHeight,
+          screenDensity: data.screenDensity,
+          vendorOsName: data.vendorOsName,
+          vendorOsVersion: data.vendorOsVersion
+        };
+      }
+    })
+  },
+
+  // --- FIXED CPU INFO LOGIC ---
+  getCpuInfo() {
+    device.getCpuInfo({
+      success: (data) => {
+        let rawInfo = data.cpuInfo || '';
+        
+        // Regex: 
+        // ^\s*         : Start of line, optional whitespace
+        // processor    : The word "processor"
+        // \s*:\s*      : Colon surrounded by optional whitespace
+        // i flag       : Case insensitive (matches "Processor" or "processor")
+        
+        this.CPU.info = rawInfo.replace(/^\s*processor\s*:\s*/i, '').trim();
+      },
+      fail: () => {
+        this.CPU.info = 'Unknown';
+      }
+    })
+  },
+
+  getStorageInfo() {
+    // 1. Get Total Storage
+    device.getTotalStorage({
+      success: (data) => {
+        this.storageInfo.totalRaw = data.totalStorage;
+        this.updateStorageDisplay();
+      }
+    });
+
+    // 2. Get Available Storage
+    device.getAvailableStorage({
+      success: (data) => {
+        this.storageInfo.availableRaw = data.availableStorage;
+        this.updateStorageDisplay();
+      }
+    });
+  },
+
+  formatToGB(bytes) {
+    if (!bytes || bytes === 0) return '0.0';
+    // 1024^3 = 1073741824
+    return (bytes / 1073741824).toFixed(1);
+  },
+
+  updateStorageDisplay() {
+    const avail = this.formatToGB(this.storageInfo.availableRaw);
+    const total = this.formatToGB(this.storageInfo.totalRaw);
+    this.storageInfo.text = `${avail}/${total} GB`;
+  },
+
+  getBatteryInfo() {
+    battery.getStatus({
+      success: (data) => {
+        this.battery.level = (data.level * 100) + '%';
+        this.battery.charging = data.charging;
+      }
+    })
+  },
+
+  getNetworkInfo() {
+    network.getType({
+      success: (data) => {
+        this.networkInfo.type = data.type || 'Unknown';
+        this.networkInfo.metered = data.metered || false;
+      },
+      fail: () => {
+        this.networkInfo.type = 'Unavailable';
+      }
+    })
+  },
+
+  subscribeNetwork() {
+    network.subscribe({
+      callback: (data) => {
+        this.networkInfo.type = data.type || 'Unknown';
+        this.networkInfo.metered = data.metered || false;
+      }
+    })
+  }
+}
+</script>
+
+<style>
+  /* Layout */
+  .page {
+    flex-direction: column;
+    padding: 0 30px;
+    background-color: #f9f9f9;
+  }
+
+  .header {
+    height: 120px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title {
+    font-size: 38px;
+    font-weight: bold;
+    color: #333;
+  }
+  .icon-btn {
+    width: 80px;
+    height: 80px;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .back-icon {
+    font-size: 80px;
+    color: #007aff;
+    margin-top: -10px;
+  }
+  .placeholder { opacity: 0; }
+
+  /* Titles */
+  .section-title {
+    font-size: 30px;
+    color: #555;
+    font-weight: bold;
+    margin-bottom: 15px;
+    margin-top: 20px;
+    padding-left: 10px;
+  }
+
+  /* Cards */
+  .card {
+    flex-direction: column;
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e5e5;
+    padding: 0 30px;
+    margin-bottom: 10px;
+  }
+
+  .info-row {
+    height: 100px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .border-bottom {
+    border-bottom-width: 1px;
+    border-bottom-color: #f0f0f0;
+  }
+
+  .label {
+    font-size: 30px;
+    color: #666;
+  }
+
+  .value {
+    font-size: 30px;
+    color: #333;
+    font-weight: bold;
+    text-align: right;
+    width: 400px; 
+    lines: 1;
+    text-overflow: ellipsis;
+  }
+
+  .highlight {
+    color: #007aff;
+  }
+</style>

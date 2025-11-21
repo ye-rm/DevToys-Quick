@@ -1,3 +1,5 @@
+<!--SPDX-License-Identifier: KAPP-R-1.0 -->
+<!--https://github.com/ye-rm/LICENSE-KAPP-R -->
 <!-- src/app.ux -->
 <template>
   <!-- 快应用要求 app.ux 必须包含一个根元素 -->
