@@ -297,19 +297,15 @@ export default {
     border-radius: 70px;
     justify-content: center;
     align-items: center;
-    box-shadow: 0px 10px 20px rgba(0, 122, 255, 0.3);
   }
 
   .mic-active {
     background-color: #ff3b30;
-    box-shadow: 0px 10px 20px rgba(255, 59, 48, 0.4);
   }
 
   .mic-icon {
     width: 60px;
     height: 60px;
-    /* Ensure icon is white */
-    filter: grayscale(100%) brightness(200%); 
   }
 
   .ripple-ring {
