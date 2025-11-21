@@ -1,7 +1,12 @@
-// SPDX-License-Identifier: KAPP-R-1.0
-// https://github.com/ye-rm/LICENSE-KAPP-R
-// src/common/constants.js
-
+/**
+* @author Ye Wenyu
+* @date 2025/11/21
+* @version 1.0.0
+*
+* @copyright Copyright (c) 2025 Ye Wenyu
+* SPDX-License-Identifier: KAPP-R-1.0
+* @see {@link https://github.com/ye-rm/LICENSE-KAPP-R}
+*/
 export default {
     TOOLS: [
       {

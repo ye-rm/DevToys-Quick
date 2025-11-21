@@ -1,5 +1,12 @@
-<!--SPDX-License-Identifier: KAPP-R-1.0 -->
-<!--https://github.com/ye-rm/LICENSE-KAPP-R -->
+/**
+* @author Ye Wenyu
+* @date 2025/11/21
+* @version 1.0.0
+*
+* @copyright Copyright (c) 2025 Ye Wenyu
+* SPDX-License-Identifier: KAPP-R-1.0
+* @see {@link https://github.com/ye-rm/LICENSE-KAPP-R}
+*/
 <!-- src/app.ux -->
 <template>
   <!-- 快应用要求 app.ux 必须包含一个根元素 -->
@@ -40,6 +47,5 @@ export default {
 </script>
 
 <style>
-/* 全局样式（可选） */
-/* 注意：快应用中全局样式作用有限，建议在各页面或组件中定义 */
+
 </style>

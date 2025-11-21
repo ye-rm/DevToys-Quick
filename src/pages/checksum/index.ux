@@ -1,5 +1,12 @@
-<!--SPDX-License-Identifier: KAPP-R-1.0 -->
-<!--https://github.com/ye-rm/LICENSE-KAPP-R -->
+/**
+* @author Ye Wenyu
+* @date 2025/11/21
+* @version 1.0.0
+*
+* @copyright Copyright (c) 2025 Ye Wenyu
+* SPDX-License-Identifier: KAPP-R-1.0
+* @see {@link https://github.com/ye-rm/LICENSE-KAPP-R}
+*/
 <template>
   <div class="page">
     <!-- Header -->
@@ -14,7 +21,7 @@
     <!-- File Selection Section -->
     <div class="card action-card">
       <image class="upload-icon" src="/assets/icons/upload.svg"></image>
-      <text class="action-title" if="{{!fileName}}">Select a file to hash</text>
+      <text class="action-title" if="{{!fileName}}">Select a file to hash(≤ 10MB)</text>
       <text class="file-name" if="{{fileName}}">{{fileName}}</text>
       <text class="file-size" if="{{fileSize}}">{{fileSize}}</text>
       
