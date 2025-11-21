@@ -13,7 +13,9 @@
     { "name": "system.file" },
     { "name": "system.device"},
     { "name": "system.battery"},
-    { "name": "system.network"}
+    { "name": "system.network"},
+    { "name": "service.asr"},
+    { "name": "system.vibrator"}
   ],
   "permissions": [
     { "origin": "*" }
@@ -34,13 +36,7 @@
       "pages/xml-formatter": {
         "component": "index"
       },
-      "pages/regex-tester": {
-        "component": "index"
-      },
       "pages/password-gen": {
-        "component": "index"
-      },
-      "pages/markdown-preview": {
         "component": "index"
       },
       "pages/number-base": {
@@ -52,7 +48,13 @@
       "pages/checksum": {
         "component": "index"
       },
+      "pages/speech2text":{
+        "component": "index"
+      },
       "pages/system-info": {
+        "component": "index"
+      },
+      "pages/about": {
         "component": "index"
       }
     }

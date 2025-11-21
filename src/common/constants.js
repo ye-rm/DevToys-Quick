@@ -24,21 +24,11 @@ export default {
         icon: '/assets/icons/xml.svg',
         route: 'pages/xml-formatter'
       },
-      // {
-      //   name: '正则测试器',
-      //   icon: '/assets/icons/regex.svg',
-      //   route: '/pages/regex-tester'
-      // },
-      // {
-      //   name: '密码生成器',
-      //   icon: '/assets/icons/password.svg',
-      //   route: '/pages/password-gen'
-      // },
-      // {
-      //   name: 'Markdown 预览',
-      //   icon: '/assets/icons/markdown.svg',
-      //   route: '/pages/markdown-preview'
-      // },
+      {
+        name: '密码生成器',
+        icon: '/assets/icons/password.svg',
+        route: '/pages/password-gen'
+      },
       {
         name: "哈希生成",
         icon: '/assets/icons/hash.svg',
@@ -50,9 +40,19 @@ export default {
         route: '/pages/checksum'
       },
       {
+        name: "语音转文字",
+        icon: '/assets/icons/mic.svg',
+        route: '/pages/speech2text'
+      },
+      {
         name: "系统信息",
         icon: '/assets/icons/system-info.svg',
         route: '/pages/system-info'
+      },
+      {
+        name: "关于",
+        icon: '/assets/icons/quickapp.svg',
+        route: '/pages/about'
       }
     ]
   };

@@ -1,0 +1,347 @@
+<template>
+  <div class="page">
+    <!-- Header -->
+    <div class="header">
+      <div class="icon-btn" onclick="goBack">
+        <text class="back-icon">‹</text>
+      </div>
+      <text class="title">About</text>
+      <div class="icon-btn placeholder"></div>
+    </div>
+
+    <!-- Branding / Hero Section -->
+    <div class="hero-section">
+      <image class="app-logo" src="/assets/images/logo.png"></image>
+      <text class="app-name">Inspiration</text>
+      <text class="app-version">Quick App Edition v1.0.0</text>
+
+      <!-- NEW: GitHub Project Link -->
+      <div class="github-btn" onclick="openLink('https://github.com/ye-rm/Devtoys-Quick')">
+        <text class="github-text">View Source on GitHub ↗</text>
+      </div>
+    </div>
+
+    <!-- Introduction Card -->
+    <div class="card">
+      <div class="card-header">
+        <text class="card-title">📱 Inspiration</text>
+      </div>
+      <text class="paragraph">
+        Inspiration is a multifunction utility toolbox built for the Quick App ecosystem. The app’s ideas, design style, and several features are heavily inspired by the excellent open-source project DevToys.
+      </text>
+      <text class="paragraph">
+        On top of that foundation, this project redesigns the experience, layout, and interactions for mobile scenarios, making it an efficient and lightweight toolset on mobile devices.
+      </text>
+      
+      <!-- Link to Original Project -->
+      <div class="link-row" onclick="openLink('https://github.com/DevToys-app/DevToys')">
+        <text class="link-text">Original Idea: DevToys (GitHub) ↗</text>
+      </div>
+    </div>
+
+    <!-- Features Card -->
+    <div class="card">
+      <div class="card-header">
+        <text class="card-title">✨ Features</text>
+      </div>
+      <div class="list-item">
+        <text class="bullet">🌈</text>
+        <text class="list-text">A collection of practical developer tools</text>
+      </div>
+      <div class="list-item">
+        <text class="bullet">📱</text>
+        <text class="list-text">Optimized UI/UX for Quick App</text>
+      </div>
+      <div class="list-item">
+        <text class="bullet">⚡</text>
+        <text class="list-text">Lightweight and instantly available</text>
+      </div>
+      <div class="list-item">
+        <text class="bullet">🎨</text>
+        <text class="list-text">Design language inspired by DevToys, adapted for mobile</text>
+      </div>
+      <div class="list-item">
+        <text class="bullet">🔧</text>
+        <text class="list-text">Mostly offline tools for privacy and convenience</text>
+      </div>
+    </div>
+
+    <!-- Recommendation Card -->
+    <div class="card">
+      <div class="card-header">
+        <text class="card-title">💡 Pro Tip</text>
+      </div>
+      <text class="paragraph">
+        To significantly enhance your experience with <span class="bold-text">Clipboard Sync</span> between your PC and this app, we recommend using <span class="bold-text">WeChat Keyboard</span>.
+      </text>
+      
+      <div class="info-box">
+        <text class="info-text">
+          * This is an independent recommendation to improve utility. We have no commercial relationship with this software.
+        </text>
+      </div>
+
+      <div class="link-row" onclick="openLink('https://z.weixin.qq.com/')">
+        <text class="link-text">Download WeChat Keyboard ↗</text>
+      </div>
+    </div>
+
+    <!-- Background Card -->
+    <div class="card">
+      <div class="card-header">
+        <text class="card-title">🧭 Background</text>
+      </div>
+      <text class="paragraph">
+        This project is inspired by DevToys and aims to provide a similar on-device toolbox for the Quick App platform. The goal is to leverage Quick App’s fast startup and lightweight characteristics to offer a set of ready-to-use, mobile-friendly utilities.
+      </text>
+    </div>
+
+    <!-- License Card -->
+    <div class="card">
+      <div class="card-header">
+        <text class="card-title">📦 License</text>
+      </div>
+      <text class="paragraph">
+        This project uses the <span class="bold-text">KAPP-Restricted License (KAPP-R License)</span>.
+      </text>
+      <text class="paragraph">
+        It is MIT-based but includes additional restrictions:
+      </text>
+      <div class="warning-box">
+        <text class="warning-text">• Derivative works <span class="bold-text">must not use</span> Quick App payment APIs.</text>
+        <text class="warning-text">• Derivative works <span class="bold-text">must not use</span> Quick App advertising-related APIs.</text>
+        <text class="warning-text">• Violation results in automatic termination of rights.</text>
+      </div>
+      
+      <div class="link-row" onclick="openLink('https://github.com/ye-rm/LICENSE-KAPP-R')">
+        <text class="link-text">View Full License ↗</text>
+      </div>
+    </div>
+
+    <!-- Acknowledgements Card -->
+    <div class="card">
+      <div class="card-header">
+        <text class="card-title">🙏 Acknowledgements</text>
+      </div>
+      <text class="paragraph">Special thanks to:</text>
+      <div class="list-item">
+        <text class="bullet">•</text>
+        <text class="list-text">The <span class="bold-text">DevToys</span> project for its concept, design inspiration, and great implementation.</text>
+      </div>
+      <div class="list-item">
+        <text class="bullet">•</text>
+        <text class="list-text">The Quick App community for development capabilities and platform support.</text>
+      </div>
+    </div>
+
+    <!-- Footer / Copyright -->
+    <div class="footer-info">
+      <text class="footer-text">Made with ❤️ for Developers</text>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+
+export default {
+  data: {},
+
+  onInit() {},
+
+  goBack() {
+    router.back();
+  },
+
+  openLink(url) {
+    router.push({
+      uri: url
+    });
+  }
+}
+</script>
+
+<style>
+  /* --- Global Layout --- */
+  .page {
+    flex-direction: column;
+    padding: 0 30px;
+    background-color: #f9f9f9;
+  }
+
+  /* --- Header --- */
+  .header {
+    height: 120px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title {
+    font-size: 38px;
+    font-weight: bold;
+    color: #333;
+  }
+  .icon-btn {
+    width: 80px;
+    height: 80px;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .back-icon {
+    font-size: 80px;
+    color: #007aff;
+    margin-top: -10px;
+  }
+  .placeholder { opacity: 0; }
+
+  /* --- Hero Section --- */
+  .hero-section {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+    margin-top: 10px;
+  }
+  .app-logo {
+    width: 160px;
+    height: 160px;
+    border-radius: 30px;
+    margin-bottom: 20px;
+  }
+  .app-name {
+    font-size: 42px;
+    font-weight: bold;
+    color: #333;
+  }
+  .app-version {
+    font-size: 26px;
+    color: #888;
+    margin-top: 10px;
+  }
+
+  /* NEW: GitHub Button Style */
+  .github-btn {
+    margin-top: 30px;
+    background-color: #24292e; /* GitHub Black */
+    padding: 15px 40px;
+    border-radius: 40px;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+  }
+  .github-btn:active {
+    opacity: 0.8;
+  }
+  .github-text {
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  /* --- Cards --- */
+  .card {
+    flex-direction: column;
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e5e5;
+    padding: 30px;
+    margin-bottom: 30px;
+  }
+
+  .card-header {
+    margin-bottom: 20px;
+    border-bottom-width: 1px;
+    border-bottom-color: #f0f0f0;
+    padding-bottom: 15px;
+  }
+  
+  .card-title {
+    font-size: 34px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  /* --- Typography --- */
+  .paragraph {
+    font-size: 28px;
+    color: #555;
+    line-height: 40px;
+    margin-bottom: 20px;
+  }
+
+  .bold-text {
+    font-weight: bold;
+    color: #333;
+  }
+
+  /* --- Lists --- */
+  .list-item {
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 15px;
+  }
+  .bullet {
+    font-size: 28px;
+    margin-right: 15px;
+    color: #333;
+  }
+  .list-text {
+    flex: 1;
+    font-size: 28px;
+    color: #555;
+    line-height: 40px;
+  }
+
+  /* --- Warning Box --- */
+  .warning-box {
+    background-color: #fff3f3;
+    border: 1px solid #ffcdd2;
+    border-radius: 10px;
+    padding: 20px;
+    flex-direction: column;
+    margin-bottom: 20px;
+  }
+  .warning-text {
+    font-size: 26px;
+    color: #d32f2f;
+    margin-bottom: 10px;
+  }
+
+  /* --- Info Box --- */
+  .info-box {
+    background-color: #f0f8ff; 
+    border: 1px solid #cce5ff;
+    border-radius: 10px;
+    padding: 20px;
+    flex-direction: column;
+    margin-bottom: 20px;
+  }
+  .info-text {
+    font-size: 26px;
+    color: #0056b3;
+    font-style: italic;
+  }
+
+  /* --- Links --- */
+  .link-row {
+    margin-top: 10px;
+    padding: 15px 0;
+  }
+  .link-text {
+    font-size: 28px;
+    color: #007aff;
+    font-weight: bold;
+    text-decoration: underline;
+  }
+
+  /* --- Footer --- */
+  .footer-info {
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 50px;
+    margin-top: 20px;
+  }
+  .footer-text {
+    font-size: 24px;
+    color: #aaa;
+  }
+</style>

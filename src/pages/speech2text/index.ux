@@ -1,0 +1,336 @@
+<template>
+  <div class="page">
+    <!-- Header -->
+    <div class="header">
+      <div class="icon-btn" onclick="goBack">
+        <text class="back-icon">‹</text>
+      </div>
+      <text class="title">Speech to Text</text>
+      <div class="icon-btn placeholder"></div>
+    </div>
+
+    <!-- Output Area -->
+    <div class="card output-card">
+      <!-- Added onchange to sync manual typing -->
+      <textarea 
+        class="output-area" 
+        placeholder="Tap the mic and speak..." 
+        value="{{textOutput}}"
+        onchange="onTextChange">
+      </textarea>
+      
+      <div class="action-row">
+        <div class="mini-btn" onclick="copyText">
+          <text class="mini-btn-text">Copy</text>
+        </div>
+        <div class="mini-btn" onclick="clearText">
+          <text class="mini-btn-text">Clear</text>
+        </div>
+      </div>
+    </div>
+
+    <!-- Microphone Control -->
+    <div class="mic-container">
+      <div class="status-text-wrapper">
+        <text class="status-text" style="color: {{statusColor}}">{{status}}</text>
+      </div>
+
+      <div class="mic-wrapper">
+        <div class="{{isListening ? 'ripple-ring' : ''}}"></div>
+        <div class="mic-btn {{isListening ? 'mic-active' : ''}}" onclick="toggleAsr">
+          <image class="mic-icon" src="/assets/icons/mic.svg"></image>
+        </div>
+      </div>
+      
+      <text class="hint-text">Tap to Start / Stop</text>
+    </div>
+
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+import asr from '@service.asr'
+import prompt from '@system.prompt'
+import clipboard from '@system.clipboard'
+import vibrator from '@system.vibrator'
+
+export default {
+  data: {
+    textOutput: '',
+    previousText: '', // Stores text before current dictation session
+    isListening: false,
+    status: 'Ready',
+    statusColor: '#666666'
+  },
+
+  onInit() {
+    this.initAsrListeners();
+  },
+
+  onDestroy() {
+    this.stopAsr();
+  },
+
+  goBack() {
+    router.back()
+  },
+
+  // Keep model in sync if user types manually
+  onTextChange(e) {
+    this.textOutput = e.value;
+  },
+
+  initAsrListeners() {
+    const that = this;
+
+    // 1. FINAL RESULT
+    asr.oncompleteresult = ({ result }) => {
+      // Combine what we had before + new result
+      that.textOutput = that.previousText + result; 
+      that.updateStatus('Done', '#28a745'); // Green
+      that.stopUiState();
+    };
+
+    // 2. ERROR HANDLING (The Hint Logic)
+    asr.onerror = (error) => {
+      that.stopUiState();
+      let msg = '';
+      
+      // Common ASR Error Codes
+      switch (parseInt(error.errorcode)) {
+        case 1003: // Network timeout / No speech
+        case 1004: // No speech recognized
+          msg = 'No speech detected. Please speak louder.';
+          break;
+        case 1001: // Network error
+          msg = 'Network error. Check connection.';
+          break;
+        case 1002: // Service unavailable
+          msg = 'Voice service unavailable.';
+          break;
+        default:
+          msg = `Error: ${error.errorcode}`;
+      }
+
+      that.updateStatus('Failed', '#ff3b30');
+      // Show the specific hint to the user
+      prompt.showToast({ message: msg });
+    };
+
+    // 3. REAL-TIME TYPING EFFECT
+    asr.onpartialresult = ({ result }) => {
+      if (result) {
+        // Display: Old Text + Current Speech
+        that.textOutput = that.previousText + result;
+      }
+    };
+  },
+
+  toggleAsr() {
+    if (this.isListening) {
+      this.stopAsr();
+    } else {
+      this.startAsr();
+    }
+  },
+
+  startAsr() {
+    const that = this;
+    
+    this.isListening = true;
+    this.updateStatus('Initializing...', '#007aff');
+    
+    // Save what was already in the textbox so we don't delete it
+    // We add a space if there is existing text
+    this.previousText = this.textOutput + (this.textOutput ? ' ' : ''); 
+
+    asr.start({
+      lang: 'zh_CN', // Change to 'en_US' if you want English
+      success: function() {
+        vibrator.vibrate({ mode: 'short' });
+        that.updateStatus('Listening...', '#ff3b30'); // Red while active
+      },
+      fail: function(data, code) {
+        that.updateStatus('Start Failed', '#ff3b30');
+        that.stopUiState();
+        prompt.showToast({ message: 'Could not access microphone' });
+      }
+    });
+  },
+
+  stopAsr() {
+    if (!this.isListening) return;
+    asr.stop();
+    // Note: We don't call stopUiState here immediately, 
+    // we wait for oncompleteresult or onerror to trigger.
+  },
+
+  stopUiState() {
+    this.isListening = false;
+    // Sync previous text for next run
+    this.previousText = this.textOutput;
+  },
+
+  updateStatus(text, color) {
+    this.status = text;
+    this.statusColor = color;
+  },
+
+  copyText() {
+    if (!this.textOutput) return;
+    clipboard.set({
+      text: this.textOutput,
+      success: () => prompt.showToast({ message: 'Copied to clipboard' })
+    });
+  },
+
+  clearText() {
+    this.textOutput = '';
+    this.previousText = '';
+    this.updateStatus('Ready', '#666666');
+  }
+}
+</script>
+
+<style>
+  /* Layout */
+  .page {
+    flex-direction: column;
+    padding: 0 30px;
+    background-color: #f9f9f9;
+  }
+
+  .header {
+    height: 120px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title {
+    font-size: 38px;
+    font-weight: bold;
+    color: #333;
+  }
+  .icon-btn {
+    width: 80px;
+    height: 80px;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .back-icon {
+    font-size: 80px;
+    color: #007aff;
+    margin-top: -10px;
+  }
+  .placeholder { opacity: 0; }
+
+  /* Output Area */
+  .output-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e5e5;
+    padding: 20px;
+    margin-bottom: 40px;
+    flex-direction: column;
+    height: 500px; /* Made slightly taller */
+  }
+  
+  .output-area {
+    flex: 1;
+    font-size: 32px;
+    color: #333;
+    line-height: 45px;
+    placeholder-color: #bbbbbb;
+  }
+
+  .action-row {
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-top: 20px;
+    border-top-width: 1px;
+    border-top-color: #f0f0f0;
+    padding-top: 15px;
+  }
+
+  .mini-btn {
+    margin-left: 20px;
+    padding: 10px 25px;
+    background-color: #f0f2f5;
+    border-radius: 12px;
+  }
+  .mini-btn:active {
+    background-color: #e0e0e0;
+  }
+  .mini-btn-text { font-size: 26px; color: #555; }
+
+  /* Mic UI */
+  .mic-container {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .status-text-wrapper {
+    height: 60px;
+    align-items: center;
+  }
+  .status-text {
+    font-size: 30px;
+    font-weight: bold;
+  }
+
+  .mic-wrapper {
+    width: 200px;
+    height: 200px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .mic-btn {
+    width: 140px;
+    height: 140px;
+    background-color: #007aff;
+    border-radius: 70px;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0px 10px 20px rgba(0, 122, 255, 0.3);
+  }
+
+  .mic-active {
+    background-color: #ff3b30;
+    box-shadow: 0px 10px 20px rgba(255, 59, 48, 0.4);
+  }
+
+  .mic-icon {
+    width: 60px;
+    height: 60px;
+    /* Ensure icon is white */
+    filter: grayscale(100%) brightness(200%); 
+  }
+
+  .ripple-ring {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 90px;
+    border: 4px solid #ff3b30;
+    opacity: 0.5;
+    animation-name: ripple;
+    animation-duration: 1.5s;
+    animation-iteration-count: infinite;
+  }
+
+  @keyframes ripple {
+    from { transform: scale(1); opacity: 0.6; }
+    to { transform: scale(1.5); opacity: 0; }
+  }
+
+  .hint-text {
+    font-size: 24px;
+    color: #999;
+  }
+</style>
