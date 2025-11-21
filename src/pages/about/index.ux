@@ -1,7 +1,7 @@
 /**
 * @author Ye Wenyu
 * @date 2025/11/21
-* @version 1.0.0
+* @version 1.0.1
 *
 * @copyright Copyright (c) 2025 Ye Wenyu
 * SPDX-License-Identifier: KAPP-R-1.0
@@ -22,8 +22,8 @@
     <!-- Branding / Hero Section -->
     <div class="hero-section">
       <image class="app-logo" src="/assets/images/logo.png"></image>
-      <text class="app-name">Inspiration</text>
-      <text class="app-version">Quick App Edition v1.0.0</text>
+      <text class="app-name">Devtoys-Quick</text>
+      <text class="app-version">v{{ versionStr }}</text>
 
       <!-- NEW: GitHub Project Link -->
       <div class="github-btn" onclick="openLink('https://github.com/ye-rm/Devtoys-Quick')">
@@ -37,7 +37,7 @@
         <text class="card-title">📱 Inspiration</text>
       </div>
       <text class="paragraph">
-        Inspiration is a multifunction utility toolbox built for the Quick App ecosystem. The app’s ideas, design style, and several features are heavily inspired by the excellent open-source project DevToys.
+        The app's ideas, design style, and several features are heavily inspired by the excellent open-source project DevToys.
       </text>
       <text class="paragraph">
         On top of that foundation, this project redesigns the experience, layout, and interactions for mobile scenarios, making it an efficient and lightweight toolset on mobile devices.
@@ -153,11 +153,22 @@
 
 <script>
 import router from '@system.router'
+import app from '@system.app'
 
 export default {
-  data: {},
+  data: {
+    versionStr: ''
+  },
 
-  onInit() {},
+  onInit() {
+    // 2. Call app.getInfo() to get metadata
+    const info = app.getInfo();
+
+    // 3. Assign to your data
+    this.versionStr = info.versionName; // e.g., "1.0.0"
+    
+    console.info(`Running Version: ${this.versionStr}`);
+  },
 
   goBack() {
     router.back();
@@ -236,7 +247,6 @@ export default {
     border-radius: 40px;
     justify-content: center;
     align-items: center;
-    box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
   }
   .github-btn:active {
     opacity: 0.8;
