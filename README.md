@@ -2,10 +2,9 @@
 
 ------
 
-# 📱 Inspiration (Quick App)
+# 📱 Inspiration
 
-**Inspiration** is a multifunction utility toolbox built for the **Quick App** ecosystem.
- The app’s ideas, design style, and several features are heavily inspired by the excellent open-source project **DevToys** (https://github.com/DevToys-app/DevToys).
+The app’s ideas, design style, and several features are heavily inspired by the excellent open-source project **DevToys** (https://github.com/DevToys-app/DevToys).
 
 On top of that foundation, this project redesigns the experience, layout, and interactions for mobile scenarios and Quick App platform characteristics, making it an efficient and lightweight toolset on mobile devices.
 
