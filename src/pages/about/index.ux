@@ -26,7 +26,7 @@
       <text class="app-version">v{{ versionStr }}</text>
 
       <!-- NEW: GitHub Project Link -->
-      <div class="github-btn" onclick="openLink('https://github.com/ye-rm/Devtoys-Quick')">
+      <div class="github-btn" onclick="openLink('https://github.com/ye-rm/DevToys-Quick')">
         <text class="github-text">View Source on GitHub ↗</text>
       </div>
     </div>
