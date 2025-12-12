@@ -31,8 +31,8 @@
 <script>
 import router from '@system.router'
 // Import the default export from your constants file
-// Relative path assumes: src/pages/home/index/index.ux -> ../../common/constants.js
-import constants from '../../../common/constants'
+// Relative path assumes: src/pages/home/index.ux -> ../../common/constants.js
+import constants from '../../common/constants'
 
 export default {
   // Define the data model

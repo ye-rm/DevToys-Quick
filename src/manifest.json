@@ -22,9 +22,9 @@
   ],
   "config": {},
   "router": {
-    "entry": "pages/home/index",
+    "entry": "pages/home",
     "pages": {
-      "pages/home/index": {
+      "pages/home": {
         "component": "index"
       },
       "pages/base64": {
@@ -63,6 +63,20 @@
     "themeMode": 0,
     "backgroundColor": "#ffffff",
     "titleBarBackgroundColor": "#ffffff",
-    "titleBarTextColor": "#000000"
+    "titleBarTextColor": "#000000",
+    "pages": {
+      "Hello": {
+        "menuBarData": {
+          "menuBar": true,
+          "menuBarStyle":"dark",
+          "shareTitle":"Home Page",
+          "shareDescription":"Dev-toys-quick",
+          "shareIcon":"/assets/images/logo.png",
+          "shareCurrentPage":true,
+          "shareUrl":"https://github.com/ye-rm/DevToys-Quick",
+          "shareParams":"{key:1,id:2})"
+         }
+      }
+    }
   }
 }
