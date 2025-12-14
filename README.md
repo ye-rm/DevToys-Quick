@@ -18,8 +18,6 @@ On top of that foundation, this project redesigns the experience, layout, and in
 - 🎨 Design language inspired by DevToys, adapted for mobile
 - 🔧 Mostly offline tools for privacy and convenience
 
-(You may enrich this section with real features)
-
 ------
 
 ## 🧭 Background
