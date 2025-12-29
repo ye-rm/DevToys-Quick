@@ -31,7 +31,7 @@ This project is inspired by DevToys and aims to provide a similar on-device tool
 
 This project uses the **KAPP-Restricted License (KAPP-R License)**.
 
-See the [`LICENSE`](./LICENSE) file or [KAPP-Restricted License](https://github.com/ye-rm/LICENSE-KAPP-R) for full details.
+See the [`LICENSE`](./LICENSE.md) file or [KAPP-Restricted License](https://github.com/ye-rm/LICENSE-KAPP-R) for full details.
 
 ------
 
