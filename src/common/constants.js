@@ -1,10 +1,10 @@
 /**
 * @author Ye Wenyu
-* @date 2025/11/21
-* @version 1.0.0
+* @date 2025/12/29
+* @version 1.1
 *
 * @copyright Copyright (c) 2025 Ye Wenyu
-* SPDX-License-Identifier: KAPP-R-1.0
+* SPDX-License-Identifier: KAPP-R-1.1
 * @see {@link https://github.com/ye-rm/LICENSE-KAPP-R}
 */
 export default {

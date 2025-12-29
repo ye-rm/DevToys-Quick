@@ -1,13 +1,12 @@
 /**
 * @author Ye Wenyu
-* @date 2025/11/21
-* @version 1.0.1
+* @date 2025/12/29
+* @version 1.1
 *
 * @copyright Copyright (c) 2025 Ye Wenyu
-* SPDX-License-Identifier: KAPP-R-1.0
+* SPDX-License-Identifier: KAPP-R-1.1
 * @see {@link https://github.com/ye-rm/LICENSE-KAPP-R}
 */
-
 <template>
   <div class="page">
     <!-- Header -->
@@ -85,9 +84,10 @@
         To significantly enhance your experience with <span class="bold-text">Clipboard Sync</span> between your PC and this app, we recommend using <span class="bold-text">WeChat Keyboard</span>.
       </text>
       
+      <!-- 符合 KAPP-R v1.1 Clause 3 的利益无关声明 -->
       <div class="info-box">
         <text class="info-text">
-          * This is an independent recommendation to improve utility. We have no commercial relationship with this software.
+          ⚠️ Neutrality Statement: This is an independent recommendation. We have NO financial interest, affiliation, or partnership with the mentioned third-party software.
         </text>
       </div>
 
@@ -112,19 +112,19 @@
         <text class="card-title">📦 License</text>
       </div>
       <text class="paragraph">
-        This project uses the <span class="bold-text">KAPP-Restricted License (KAPP-R License)</span>.
+        This project is licensed under <span class="bold-text">KAPP-Restricted License v1.1</span>.
       </text>
       <text class="paragraph">
-        It is MIT-based but includes additional restrictions:
+        It strictly prohibits commercial exploitation to protect users:
       </text>
       <div class="warning-box">
-        <text class="warning-text">• Derivative works <span class="bold-text">must not use</span> Quick App payment APIs.</text>
-        <text class="warning-text">• Derivative works <span class="bold-text">must not use</span> Quick App advertising-related APIs.</text>
-        <text class="warning-text">• Violation results in automatic termination of rights.</text>
+        <text class="warning-text">• <span class="bold-text">No Monetization:</span> Any form of payment or advertising features is strictly prohibited.</text>
+        <text class="warning-text">• <span class="bold-text">No Bypassing:</span> Bypassing restrictions via WebViews or external links is not allowed.</text>
+        <text class="warning-text">• <span class="bold-text">Transparency:</span> All third-party links must declare a "No Conflict of Interest" status.</text>
       </div>
       
       <div class="link-row" onclick="openLink('https://github.com/ye-rm/LICENSE-KAPP-R')">
-        <text class="link-text">View Full License ↗</text>
+        <text class="link-text">Read License v1.1 Full Text ↗</text>
       </div>
     </div>
 
@@ -133,16 +133,13 @@
       <div class="card-header">
         <text class="card-title">🙏 Acknowledgements</text>
       </div>
-      <text class="paragraph">Special thanks to:</text>
-      <div class="list-item">
-        <text class="bullet">•</text>
-        <text class="list-text">The <span class="bold-text">DevToys</span> project for its concept, design inspiration, and great implementation.</text>
-      </div>
-      <div class="list-item">
-        <text class="bullet">•</text>
-        <text class="list-text">The Quick App community for development capabilities and platform support.</text>
+      <text class="paragraph">Special thanks to <span class="bold-text">DevToys</span> for the inspiration. (No commercial affiliation).</text>
+      
+      <div class="link-row" onclick="openLink('https://github.com/DevToys-app/DevToys')">
+        <text class="link-text">Visit DevToys Repository ↗</text>
       </div>
     </div>
+
 
     <!-- Footer / Copyright -->
     <div class="footer-info">
