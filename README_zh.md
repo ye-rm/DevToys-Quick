@@ -29,12 +29,6 @@
 
 本项目采用 **KAPP-Restricted License (KAPP-R License)**。
 
-该 License 基于 MIT 扩展，但规定：
-
-- 派生项目 **禁止使用** 快应用支付 API（如 `pay`）
-- 派生项目 **禁止使用** 快应用广告相关 API
-- 违规将导致自动终止许可
-
 详见 [`LICENSE`](./LICENSE) 文件或[KAPP-Restricted License](https://github.com/ye-rm/LICENSE-KAPP-R)了解关于License的更多信息。
 
 ------
