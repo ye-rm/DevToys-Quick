@@ -31,12 +31,6 @@ This project is inspired by DevToys and aims to provide a similar on-device tool
 
 This project uses the **KAPP-Restricted License (KAPP-R License)**.
 
-It is MIT-based but includes additional restrictions:
-
-- Derivative works **must not use** Quick App payment APIs (e.g., `pay`)
-- Derivative works **must not use** Quick App advertising-related APIs
-- Violation results in automatic termination of the granted rights
-
 See the [`LICENSE`](./LICENSE) file or [KAPP-Restricted License](https://github.com/ye-rm/LICENSE-KAPP-R) for full details.
 
 ------
