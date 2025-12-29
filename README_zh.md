@@ -29,7 +29,7 @@
 
 本项目采用 **KAPP-Restricted License (KAPP-R License)**。
 
-详见 [`LICENSE`](./LICENSE) 文件或[KAPP-Restricted License](https://github.com/ye-rm/LICENSE-KAPP-R)了解关于License的更多信息。
+详见 [`LICENSE`](./LICENSE.md) 文件或[KAPP-Restricted License](https://github.com/ye-rm/LICENSE-KAPP-R)了解关于License的更多信息。
 
 ------
 
